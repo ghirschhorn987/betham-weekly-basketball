@@ -283,6 +283,38 @@ function addWaitlistEmailResponsesToMapsForDayByGroup(day, inResponsesMapPrimary
 
 // Helper to get group type for a player
 function getPlayerGroupType(dayString, playerEmail) {
+  // First, check optional external spreadsheets for primary/secondary lists.
+  try {
+    if (PRIMARY_WAITLIST_SPREADSHEET_ID && PRIMARY_WAITLIST_SPREADSHEET_ID !== "") {
+      const ssPrimary = SpreadsheetApp.openById(PRIMARY_WAITLIST_SPREADSHEET_ID);
+      const sheetPrimary = ssPrimary.getSheets()[0];
+      const valuesPrimary = sheetPrimary.getRange(1, 1, sheetPrimary.getLastRow(), 1).getValues();
+      for (let i = 0; i < valuesPrimary.length; i++) {
+        if (valuesPrimary[i][0] && valuesPrimary[i][0].toString().trim() === playerEmail) {
+          return "PrimaryWaitlist";
+        }
+      }
+    }
+  } catch (e) {
+    Logger.log("Error checking primary waitlist external sheet: " + e);
+  }
+
+  try {
+    if (SECONDARY_WAITLIST_SPREADSHEET_ID && SECONDARY_WAITLIST_SPREADSHEET_ID !== "") {
+      const ssSecondary = SpreadsheetApp.openById(SECONDARY_WAITLIST_SPREADSHEET_ID);
+      const sheetSecondary = ssSecondary.getSheets()[0];
+      const valuesSecondary = sheetSecondary.getRange(1, 1, sheetSecondary.getLastRow(), 1).getValues();
+      for (let i = 0; i < valuesSecondary.length; i++) {
+        if (valuesSecondary[i][0] && valuesSecondary[i][0].toString().trim() === playerEmail) {
+          return "SecondaryWaitlist";
+        }
+      }
+    }
+  } catch (e) {
+    Logger.log("Error checking secondary waitlist external sheet: " + e);
+  }
+
+  // Fallback: check the RSVP spreadsheet Players tab (existing behavior)
   const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
   const tab = spreadsheet.getSheetByName("Players"); // Adjust tab name if needed
   const data = tab.getDataRange().getValues();
@@ -387,9 +419,46 @@ function getPlayerEmailsByGroup(dayString, groupType) {
 
 // Update getWaitlistGroupEmails to include both waitlist groups
 function getWaitlistGroupEmails(dayString) {
-  const primary = getPlayerEmailsByGroup(dayString, "PrimaryWaitlist");
-  const secondary = getPlayerEmailsByGroup(dayString, "SecondaryWaitlist");
+  // Prefer explicit external spreadsheets if configured, otherwise fall back
+  // to the RSVP spreadsheet "Players" tab and the Group column.
+  const primary = getPlayerEmailsFromExternalOrPlayersTab(dayString, "PrimaryWaitlist");
+  const secondary = getPlayerEmailsFromExternalOrPlayersTab(dayString, "SecondaryWaitlist");
   return [...primary, ...secondary, EMAIL_GROUP_ADMINS].join(", ");
+}
+
+// Reads emails for a group either from an external spreadsheet (if constant set)
+// or from the RSVP spreadsheet Players tab (existing behavior).
+function getPlayerEmailsFromExternalOrPlayersTab(dayString, groupType) {
+  // Map groupType to optional external spreadsheet constants
+  var externalSpreadsheetId = null;
+  if (groupType === "PrimaryWaitlist") {
+    externalSpreadsheetId = PRIMARY_WAITLIST_SPREADSHEET_ID;
+  } else if (groupType === "SecondaryWaitlist") {
+    externalSpreadsheetId = SECONDARY_WAITLIST_SPREADSHEET_ID;
+  }
+
+  // If an external spreadsheet ID is configured, try to read column A values
+  if (externalSpreadsheetId && externalSpreadsheetId !== "") {
+    try {
+      const ss = SpreadsheetApp.openById(externalSpreadsheetId);
+      const sheet = ss.getSheets()[0];
+      const values = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues();
+      const emails = [];
+      for (let i = 0; i < values.length; i++) {
+        const v = values[i][0];
+        if (v && v.toString().trim() !== "") {
+          emails.push(v.toString().trim());
+        }
+      }
+      return emails;
+    } catch (e) {
+      Logger.log("Error reading external waitlist spreadsheet (" + externalSpreadsheetId + "): " + e);
+      // fall through to fallback below
+    }
+  }
+
+  // Fallback: read from RSVP Players tab by Group column
+  return getPlayerEmailsByGroup(dayString, groupType);
 }
 
 // Not used as of 2023-01-01?

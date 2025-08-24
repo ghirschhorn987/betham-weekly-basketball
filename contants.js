@@ -60,6 +60,13 @@ const EMAIL_GROUP_ROSTER_NON_SUNDAY = "beth-am-basketball-roster-non-sunday@goog
 const EMAIL_GROUP_ROSTER_NON_TUESDAY = "beth-am-basketball-roster-non-tuesday@googlegroups.com";
 const EMAIL_GROUP_ROSTER_NON_THURSDAY = "beth-am-basketball-roster-non-thursday@googlegroups.com";
 
+// Optional: If you keep your primary and secondary waitlist email lists in
+// dedicated Google Sheets, set their spreadsheet IDs here. If left blank,
+// the code will fall back to reading the "Players" tab in the RSVP spreadsheet
+// for the given day and using the "Group" column values (existing behavior).
+const PRIMARY_WAITLIST_SPREADSHEET_ID = ""; // e.g. "1AbC..."
+const SECONDARY_WAITLIST_SPREADSHEET_ID = ""; // e.g. "1XyZ..."
+
 // Scheduled says when there is no game (due to gym not available or other reasons).
 // Important, we need to time and time zone so that date is interpreted as Los Angeles
 // date and not UTC. Time doesn't matter that much but use 5:00 so that if we accidentally

@@ -4,3 +4,19 @@ Copy of project: 1o7et8zTLOiqnEjRd1_qnFNuzEgCvtyXDFzlFl8Z0asjWNLQV2fs-dWi4
 Prodution project: 1l94ysZ1gM-rJ_F73bEyPGV5WAwc6IAVEc1tvNoJuXrZKbda0JRE9i_tp
 
 clasp clone "1o7et8zTLOiqnEjRd1_qnFNuzEgCvtyXDFzlFl8Z0asjWNLQV2fs-dWi4" --rootDir ./src
+
+
+
+The files in this project are a Google AppScrript project for an email signup and reminder system for a basketball game that plays multiple times a week with some differences in players betweend the different days played.
+
+There is a Google Sheet that keeps current state.
+
+And other Google Sheets that have player signups.
+
+Currently there is a roster of players for each day that get to sign up first for the weekly game of that day.  On that day, if there are not enough players, we allow other players to sign up.  We call the first group "roster" players and it is a fixed list of players.  We call the second group "waitlist" players.  Reminders to sign up for this waitlist go to a differen fixed list of players.
+
+I want to changet the project so the "waitlist" is broken into 2 waitlist groups.   One is called the "primary" waitlist and will consist of anyone in a list of emails that are kept in a specifid Google Sheet.   The other is the "secondary" waitlist and it will consist of  a second group of emails in another Google Sheet.
+
+The two waitlists work almost the same -- reminders go out at same time and people reply the same way.  The major difference is that when bulding the randmized order of players to be added to the game on a specific night, the list should be built as follows:
+- first randomize only the primary wait list players
+- then append to that list a list of randomized secondary wait list players

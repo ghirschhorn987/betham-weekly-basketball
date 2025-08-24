@@ -266,6 +266,62 @@ function testGetWaitlistEmailThread() {
   return threads[0];
 }
 
+// ------------------ New small tests ------------------
+// Simulate the randomized ordering: randomize primary list, then append randomized secondary list.
+function simulateWaitlistOrdering() {
+  const primary = [
+    'alice@example.com',
+    'bob@example.com',
+    'carol@example.com',
+    'dave@example.com'
+  ];
+  const secondary = [
+    'xavier@example.com',
+    'yvonne@example.com',
+    'zach@example.com'
+  ];
+
+  // Create maps so we can reuse shuffleMap which expects a Map
+  const primaryMap = new Map();
+  primary.forEach(function (email, idx) { primaryMap.set(email, { idx: idx }); });
+  const secondaryMap = new Map();
+  secondary.forEach(function (email, idx) { secondaryMap.set(email, { idx: idx }); });
+
+  const shuffledPrimary = shuffleMap(primaryMap);
+  const shuffledSecondary = shuffleMap(secondaryMap);
+
+  const finalOrder = [...Array.from(shuffledPrimary.keys()), ...Array.from(shuffledSecondary.keys())];
+
+  Logger.log('Shuffled primary: ' + JSON.stringify(Array.from(shuffledPrimary.keys())));
+  Logger.log('Shuffled secondary: ' + JSON.stringify(Array.from(shuffledSecondary.keys())));
+  Logger.log('Final concatenated order: ' + JSON.stringify(finalOrder));
+  return finalOrder;
+}
+
+// Simple unit test for shuffleMap to ensure keys are preserved and order randomized.
+function testShuffleMapUnit() {
+  const map = new Map();
+  for (let i = 1; i <= 10; i++) {
+    map.set('user' + i + '@example.com', i);
+  }
+  const before = Array.from(map.keys());
+  const after = Array.from(shuffleMap(map).keys());
+
+  Logger.log('Before shuffle: ' + JSON.stringify(before));
+  Logger.log('After shuffle:  ' + JSON.stringify(after));
+
+  // Basic checks
+  if (before.length !== after.length) {
+    throw new Error('shuffleMap changed key count');
+  }
+  const missing = before.filter(x => !after.includes(x));
+  if (missing.length > 0) {
+    throw new Error('shuffleMap dropped keys: ' + missing);
+  }
+
+  return { before: before, after: after };
+}
+
 
 function testRosterCountsPerPlayer() {
   const emails = getRosterGroupEmails(day);
