@@ -1,0 +1,6 @@
+SCRATCH
+
+Copy of project: 1o7et8zTLOiqnEjRd1_qnFNuzEgCvtyXDFzlFl8Z0asjWNLQV2fs-dWi4
+Prodution project: 1l94ysZ1gM-rJ_F73bEyPGV5WAwc6IAVEc1tvNoJuXrZKbda0JRE9i_tp
+
+clasp clone "1o7et8zTLOiqnEjRd1_qnFNuzEgCvtyXDFzlFl8Z0asjWNLQV2fs-dWi4" --rootDir ./src
