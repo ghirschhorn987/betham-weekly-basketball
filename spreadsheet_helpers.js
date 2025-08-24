@@ -1,12 +1,12 @@
 //========================================
 // Roster spreadsheet helper functions
 //========================================
-function getRosterEmailRangeName(day) {
-  switch (day) {
+function getRosterEmailRangeName(dayString) {
+  switch (dayString) {
     case "sunday": return ROSTER_EMAIL_RANGE_NAME_SUNDAY;
     case "tuesday": return ROSTER_EMAIL_RANGE_NAME_TUESDAY;
     case "thursday": return ROSTER_EMAIL_RANGE_NAME_THURSDAY;
-    default: throw new Error("Unknown day: " + day);
+    default: throw new Error("Unknown day: " + dayString);
   }
 }
 

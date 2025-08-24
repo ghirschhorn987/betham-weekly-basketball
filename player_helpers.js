@@ -122,8 +122,8 @@ function logEmailAddressesAsCommaSeparatedList() {
   logEmailAddressesAsCommaSeparatedListForTypeAndDay("rosterOtherThanDay", "sunday");
 }
 
-function logEmailAddressesAsCommaSeparatedListForTypeAndDay(listType, day) {
-  Logger.log("listType=" + listType + ", day=" + day);
+function logEmailAddressesAsCommaSeparatedListForTypeAndDay(listType, dayString) {
+  Logger.log("listType=" + listType + ", day=" + dayString);
 
   const spreadsheet = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
 
@@ -131,8 +131,8 @@ function logEmailAddressesAsCommaSeparatedListForTypeAndDay(listType, day) {
     getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(ALL_EMAIL_RANGE_NAME)));
   allPlayers = removeDuplicatePlayersFromSet(allPlayers);
 
-  if (day != undefined) {
-    var requestedDayPlayers = new Set(getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(getRosterEmailRangeName(day))));
+  if (dayString != undefined) {
+    var requestedDayPlayers = new Set(getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(getRosterEmailRangeName(dayString))));
   }
   var tuesdayPlayers = new Set(
     getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(getRosterEmailRangeName("tuesday"))));
@@ -159,11 +159,11 @@ function logEmailAddressesAsCommaSeparatedListForTypeAndDay(listType, day) {
       break;
     case "rosterForDay":
       playerList = requestedDayPlayers;
-      Logger.log("requestedDay=" + day + ", requestedDayPlayers.size=" + requestedDayPlayers.size);
+      Logger.log("requestedDay=" + dayString + ", requestedDayPlayers.size=" + requestedDayPlayers.size);
       break;
     case "rosterOtherThanDay":
       playerList = rosterPlayers;
-      switch (day) {
+      switch (dayString) {
         case "sunday":
           playerList = removePlayersAlreadyInOtherSet(playerList, sundayPlayers);
           break;
@@ -174,12 +174,12 @@ function logEmailAddressesAsCommaSeparatedListForTypeAndDay(listType, day) {
           playerList = removePlayersAlreadyInOtherSet(playerList, thursdayPlayers);
           break;
       }
-      Logger.log("requestedDay=" + day + ", rosterOtherThanDay.size=" + playerList.size);
+      Logger.log("requestedDay=" + dayString + ", rosterOtherThanDay.size=" + playerList.size);
   }
 
   // Shouldn't be needed but can't hurt
   playerList = removeDuplicatePlayersFromSet(playerList);
 
-  Logger.log("\n\n==========\n" + listType + " players, " + day + ", " + playerList.size + " players:\n=========\n" + Array.from(playerList).join(', ') + "\n==========");
+  Logger.log("\n\n==========\n" + listType + " players, " + dayString + ", " + playerList.size + " players:\n=========\n" + Array.from(playerList).join(', ') + "\n==========");
 }
 

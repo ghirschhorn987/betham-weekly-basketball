@@ -242,11 +242,11 @@ function testDateStringLogging(currentDate) {
 }
 
 function testGetWaitlistEmailThread() {
-  const day = "thursday";
+  const dayString = "thursday";
 
   //getWaitlistEmailThread("thursday");
 
-  const subject = "\"" + getWaitlistEmailSubjectForDay(day) + "\"";
+  const subject = "\"" + getWaitlistEmailSubjectForDay(dayString) + "\"";
   const query = "from: " + GHIRSCHHORN_EMAIL + " subject: " + subject;
   const threads = GmailApp.search(query);
 
