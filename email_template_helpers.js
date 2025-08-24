@@ -1,29 +1,29 @@
 //========================================
 // Email template helper functions
 //========================================
-function getRosterEmailSubject(day) {
+function getRosterEmailSubject(dayString) {
   var subject;
   if (USE_OVERRIDE_VALUES) {
     subject = OVERRIDE_ROSTER_EMAIL_SUBJECT;
   } else {
     subject = "Beth Am <<DAY_UPPERCASE>> Basketball: Sign up for <<DAY_LOWERCASE>>, <<DATE>>, <<GAME_TIME>>";
-    subject = subject.replace("<<DAY_UPPERCASE>>", day.toUpperCase());
-    subject = subject.replace("<<DAY_LOWERCASE>>", capitalizeFirstLetter(day));
-    subject = subject.replace("<<DATE>>", getDateAsString(getDateForNextOccurrenceOfDay(day)));
-    subject = subject.replace("<<GAME_TIME>>", getGameTimeString(day));
+    subject = subject.replace("<<DAY_UPPERCASE>>", dayString.toUpperCase());
+    subject = subject.replace("<<DAY_LOWERCASE>>", capitalizeFirstLetter(dayString));
+    subject = subject.replace("<<DATE>>", getDateAsString(getDateForNextOccurrenceOfDay(dayString)));
+    subject = subject.replace("<<GAME_TIME>>", getGameTimeString(dayString));
   }
   return subject;
 }
 
-function getWaitlistEmailSubjectForDay(day) {
+function getWaitlistEmailSubjectForDay(dayString) {
   var subject;
   if (USE_OVERRIDE_VALUES) {
     subject = OVERRIDE_WAITLIST_EMAIL_SUBJECT;
   } else {
     subject = "Beth Am <<DAY_UPPERCASE>> Basketball: Possible open spots for tonight, <<DATE>>, <<GAME_TIME>>";
-    subject = subject.replace("<<DAY_UPPERCASE>>", day.toUpperCase());
-    subject = subject.replace("<<DATE>>", getDateAsString(getDateForNextOccurrenceOfDay(day)));
-    subject = subject.replace("<<GAME_TIME>>", getGameTimeString(day));
+    subject = subject.replace("<<DAY_UPPERCASE>>", dayString.toUpperCase());
+    subject = subject.replace("<<DATE>>", getDateAsString(getDateForNextOccurrenceOfDay(dayString)));
+    subject = subject.replace("<<GAME_TIME>>", getGameTimeString(dayString));
   }
   return subject;
 }
@@ -40,15 +40,15 @@ function getWaitlistEmailSubjectForDate(date) {
   return subject;
 }
 
-function getInitialWaitlistReplyEmailSubjectForDay(day) {
-  return getWaitlistEmailSubjectForDay(day);
+function getInitialWaitlistReplyEmailSubjectForDay(dayString) {
+  return getWaitlistEmailSubjectForDay(dayString);
 }
 
-function getFinalWaitlistReplyEmailSubjectForDay(day) {
-  return getWaitlistEmailSubjectForDay(day);
+function getFinalWaitlistReplyEmailSubjectForDay(dayString) {
+  return getWaitlistEmailSubjectForDay(dayString);
 }
 
-function getRosterEmailBody(day, useHtml) {
+function getRosterEmailBody(dayString, useHtml) {
   var body;
   if (useHtml) {
     body = `
@@ -70,17 +70,17 @@ Gary
 `;
   }
 
-  body = body.replace("<<DAY_OF_WEEK>>", day.toUpperCase());
-  body = body.replace("<<DATE>>", getDateAsString(getDateForNextOccurrenceOfDay(day)));
-  body = body.replace("<<GAME_TIME>>", getGameTimeString(day));
-  body = body.replace("<<SIGNUP_URL>>", getRsvpSignupUrl(day));
-  body = body.replace("<<ALTERNATE_SIGNUP_URL>>", getRsvpSignupAlternateUrl(day));
+  body = body.replace("<<DAY_OF_WEEK>>", dayString.toUpperCase());
+  body = body.replace("<<DATE>>", getDateAsString(getDateForNextOccurrenceOfDay(dayString)));
+  body = body.replace("<<GAME_TIME>>", getGameTimeString(dayString));
+  body = body.replace("<<SIGNUP_URL>>", getRsvpSignupUrl(dayString));
+  body = body.replace("<<ALTERNATE_SIGNUP_URL>>", getRsvpSignupAlternateUrl(dayString));
   body = body.replace("<<EMAIL_GROUP_ADMINS>>", EMAIL_GROUP_ADMINS);
 
   return body;
 }
 
-function getWaitlistEmailBody(day, useHtml) {
+function getWaitlistEmailBody(dayString, useHtml) {
   var body;
 
   if (useHtml) {
@@ -131,12 +131,12 @@ Gary
 `;
   }
 
-  body = body.replace("<<GAME_TIME>>", getGameTimeString(day));
+  body = body.replace("<<GAME_TIME>>", getGameTimeString(dayString));
   body = body.replace("<<CONFIRMATION_TIME>>", WAITLIST_CONFIRMATION_TIME_STRING);
   return body;
 }
 
-function getInitialWaitlistReplyEmailBody(day, openSpotCount, emails, useHtml) {
+function getInitialWaitlistReplyEmailBody(dayString, openSpotCount, emails, useHtml) {
   var body;
   if (useHtml) {
     body = `
@@ -165,7 +165,7 @@ Gary
   }
 
   body = body.replace("<<OPEN_SPOTS>>", openSpotCount);
-  body = body.replace("<<GAME_TIME>>", getGameTimeString(day));
+  body = body.replace("<<GAME_TIME>>", getGameTimeString(dayString));
   body = body.replace("<<CONFIRMATION_TIME_RANGE>>", WAITLIST_CONFIRMATION_TIME_RANGE_STRING);
   if (useHtml) {
     body = body.replace("<<EMAILS_SEPARATED_BY_NEWLINES>>",
@@ -178,7 +178,7 @@ Gary
   return body;
 }
 
-function getFinalWaitlistReplyEmailBody(day, openSpotCount, emailsInGame, emailsOnWaitlist, useHtml) {
+function getFinalWaitlistReplyEmailBody(dayString, openSpotCount, emailsInGame, emailsOnWaitlist, useHtml) {
   var body;
   if (useHtml) {
     body = `
@@ -213,7 +213,7 @@ Gary
   }
 
   body = body.replace("<<OPEN_SPOTS>>", openSpotCount);
-  body = body.replace("<<GAME_TIME>>", getGameTimeString(day));
+  body = body.replace("<<GAME_TIME>>", getGameTimeString(dayString));
   if (useHtml) {
     body = body.replace("<<EMAILS_IN_GAME_SEPARATED_BY_NEWLINES>>",
       arrayAsHtmlItemizedList(emailsInGame));

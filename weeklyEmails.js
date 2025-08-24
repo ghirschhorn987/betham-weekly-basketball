@@ -206,25 +206,25 @@ function createAndSendRosterEmailForDateAndDay(date, dayString) {
   Logger.log("Finished creating and sending roster emails for day=" + dayString + ", date=" + date);
 }
 
-function createAndSendWaitlistEmailForDay(day) {
-  Logger.log("Sending waitlist emails for day: " + day);
-  const emails = getWaitlistGroupEmails(day);
-  const subject = getWaitlistEmailSubjectForDay(day);
-  const body = getWaitlistEmailBody(day, false);
-  const htmlBody = getWaitlistEmailBody(day, true);
+function createAndSendWaitlistEmailForDay(dayString) {
+  Logger.log("Sending waitlist emails for day: " + dayString);
+  const emails = getWaitlistGroupEmails(dayString);
+  const subject = getWaitlistEmailSubjectForDay(dayString);
+  const body = getWaitlistEmailBody(dayString, false);
+  const htmlBody = getWaitlistEmailBody(dayString, true);
   sendEmail(emails, subject, body, htmlBody);
-  Logger.log("Finished sending waitlist emails for day: " + day);
+  Logger.log("Finished sending waitlist emails for day: " + dayString);
 }
 
-function replyInitialToWaitlistEmailResponsesForDay(day) {
-  Logger.log("Initial replying to waitlist email responses for day: " + day);
+function replyInitialToWaitlistEmailResponsesForDay(dayString) {
+  Logger.log("Initial replying to waitlist email responses for day: " + dayString);
   var inResponsesMapPrimary = new Map();
   var inResponsesMapSecondary = new Map();
   const outResponsesMap = new Map();
   const otherResponsesMap = new Map();
 
   // Collect responses and classify by group
-  addWaitlistEmailResponsesToMapsForDayByGroup(day, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap);
+  addWaitlistEmailResponsesToMapsForDayByGroup(dayString, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap);
 
   // Randomize each group separately
   inResponsesMapPrimary = shuffleMap(inResponsesMapPrimary);
@@ -235,33 +235,33 @@ function replyInitialToWaitlistEmailResponsesForDay(day) {
   Logger.log("\r\nInitial OUT:\r\n" + arrayAsNewLineSeparatedString(Array.from(outResponsesMap.keys())));
   Logger.log("\r\nInitial OTHER:\r\n" + arrayAsNewLineSeparatedString(Array.from(otherResponsesMap.keys())));
 
-  const openSpotCount = getOpenSpotCount(day);
+  const openSpotCount = getOpenSpotCount(dayString);
   Logger.log("Open spots: " + openSpotCount);
 
   // Add primary first, then secondary
-  const range = getRsvpSpreadsheetRangeForDay(day, RSVP_CELLS_WAITLIST_RANGE);
+  const range = getRsvpSpreadsheetRangeForDay(dayString, RSVP_CELLS_WAITLIST_RANGE);
   const playersAddedArray = addValuesArrayToSpreadsheetRange(
     range,
     [...Array.from(inResponsesMapPrimary.keys()), ...Array.from(inResponsesMapSecondary.keys())],
     true
   );
 
-  const thread = getWaitlistEmailThreadForDay(day);
-  const htmlBody = getInitialWaitlistReplyEmailBody(day, openSpotCount, playersAddedArray, true);
+  const thread = getWaitlistEmailThreadForDayString(dayString);
+  const htmlBody = getInitialWaitlistReplyEmailBody(dayString, openSpotCount, playersAddedArray, true);
   forwardEmail(thread, EMAIL_GROUP_ADMINS + "," + playersAddedArray.toString(), htmlBody, "first");
 
-  Logger.log("Finished initial replying to waitlist email responses for day: " + day);
+  Logger.log("Finished initial replying to waitlist email responses for day: " + dayString);
 }
 
 // Helper to classify responses by group
-function addWaitlistEmailResponsesToMapsForDayByGroup(day, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap) {
-  const thread = getWaitlistEmailThreadForDay(day);
+function addWaitlistEmailResponsesToMapsForDayByGroup(dayString, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap) {
+  const thread = getWaitlistEmailThreadForDayString(dayString);
   const messages = thread.getMessages();
   for (var i = 0; i < messages.length; i++) {
     var msg = messages[i];
     var latestReply = msg.getPlainBody();
     var player = normalizePlayer(msg.getFrom());
-    var groupType = getPlayerGroupType(day, player); // You need to implement this helper
+    var groupType = getPlayerGroupType(dayString, player); // You need to implement this helper
 
     if (isInGameReply(latestReply)) {
       if (groupType === "PrimaryWaitlist") {
@@ -282,49 +282,40 @@ function addWaitlistEmailResponsesToMapsForDayByGroup(day, inResponsesMapPrimary
 }
 
 // Helper to get group type for a player
-function getPlayerGroupType(dayString, playerEmail) {
-  // First, check optional external spreadsheets for primary/secondary lists.
+function getPlayerGroupType(dayString, player) {
+  // Normalize the input to an email address for comparisons
+  let playerEmail = player;
   try {
-    if (PRIMARY_WAITLIST_SPREADSHEET_ID && PRIMARY_WAITLIST_SPREADSHEET_ID !== "") {
-      const ssPrimary = SpreadsheetApp.openById(PRIMARY_WAITLIST_SPREADSHEET_ID);
-      const sheetPrimary = ssPrimary.getSheets()[0];
-      const valuesPrimary = sheetPrimary.getRange(1, 1, sheetPrimary.getLastRow(), 1).getValues();
-      for (let i = 0; i < valuesPrimary.length; i++) {
-        if (valuesPrimary[i][0] && valuesPrimary[i][0].toString().trim() === playerEmail) {
-          return "PrimaryWaitlist";
+    // If player is in "Name <email>" form, extract email
+    playerEmail = getEmailFromPlayer(player);
+  } catch (e) {
+    // If helper not available or fails, fall back to input
+    playerEmail = (player || "").toString().trim();
+  }
+
+  // 1) Check the central roster spreadsheet's ALL_EMAIL_RANGE_NAME (email, RosterType)
+  try {
+    const rosterSs = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
+    const allRange = rosterSs.getRangeByName(ALL_EMAIL_RANGE_NAME);
+    if (allRange) {
+      const rows = allRange.getValues();
+      for (let r = 0; r < rows.length; r++) {
+        const email = rows[r][0] ? rows[r][0].toString().trim() : "";
+        const rosterType = rows[r][1] ? rows[r][1].toString().trim() : "";
+        if (email !== "" && email === playerEmail) {
+          if (rosterType.toLowerCase() === "main") {
+            return "PrimaryWaitlist";
+          }
+          if (rosterType.toLowerCase() === "secondaryreserve") {
+            return "SecondaryWaitlist";
+          }
         }
       }
     }
   } catch (e) {
-    Logger.log("Error checking primary waitlist external sheet: " + e);
+    Logger.log("Error reading ALL_EMAIL_RANGE_NAME from roster spreadsheet: " + e);
   }
 
-  try {
-    if (SECONDARY_WAITLIST_SPREADSHEET_ID && SECONDARY_WAITLIST_SPREADSHEET_ID !== "") {
-      const ssSecondary = SpreadsheetApp.openById(SECONDARY_WAITLIST_SPREADSHEET_ID);
-      const sheetSecondary = ssSecondary.getSheets()[0];
-      const valuesSecondary = sheetSecondary.getRange(1, 1, sheetSecondary.getLastRow(), 1).getValues();
-      for (let i = 0; i < valuesSecondary.length; i++) {
-        if (valuesSecondary[i][0] && valuesSecondary[i][0].toString().trim() === playerEmail) {
-          return "SecondaryWaitlist";
-        }
-      }
-    }
-  } catch (e) {
-    Logger.log("Error checking secondary waitlist external sheet: " + e);
-  }
-
-  // Fallback: check the RSVP spreadsheet Players tab (existing behavior)
-  const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
-  const tab = spreadsheet.getSheetByName("Players"); // Adjust tab name if needed
-  const data = tab.getDataRange().getValues();
-  const emailColIdx = data[0].indexOf("Email");
-  const groupColIdx = data[0].indexOf("Group");
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][emailColIdx] === playerEmail) {
-      return data[i][groupColIdx];
-    }
-  }
   return null;
 }
 
@@ -351,8 +342,8 @@ function copyTemplateRsvpTabToRsvpSpreadsheetTab(templateRsvpTab, rsvpSpreadshee
 }
 
 
-function addWaitlistEmailResponsesToMapsForDay(day, inResponsesMap, outResponsesMap, otherResponsesMap) {
-  const thread = getWaitlistEmailThreadForDay(day);
+function addWaitlistEmailResponsesToMapsForDay(dayString, inResponsesMap, outResponsesMap, otherResponsesMap) {
+  const thread = getWaitlistEmailThreadForDayString(dayString);
   addWaitlistEmailResponsesToMapsForThread(thread, inResponsesMap, outResponsesMap, otherResponsesMap);
 }
 
@@ -419,11 +410,86 @@ function getPlayerEmailsByGroup(dayString, groupType) {
 
 // Update getWaitlistGroupEmails to include both waitlist groups
 function getWaitlistGroupEmails(dayString) {
-  // Prefer explicit external spreadsheets if configured, otherwise fall back
-  // to the RSVP spreadsheet "Players" tab and the Group column.
-  const primary = getPlayerEmailsFromExternalOrPlayersTab(dayString, "PrimaryWaitlist");
-  const secondary = getPlayerEmailsFromExternalOrPlayersTab(dayString, "SecondaryWaitlist");
+  // Prefer building waitlist groups from the central roster spreadsheet.
+  const primary = getPrimaryWaitlistEmails(dayString);
+  const secondary = getSecondaryWaitlistEmails(dayString);
   return [...primary, ...secondary, EMAIL_GROUP_ADMINS].join(", ");
+}
+
+// Build primary waitlist emails from ROSTER_SPREADSHEET_ID.
+// Primary = any email in ALL_EMAIL_RANGE_NAME with RosterType == 'Main',
+function getPrimaryWaitlistEmails(dayString) {
+  const emailsSet = new Set();
+  try {
+    const rosterSs = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
+    // Read ALL_EMAIL_RANGE_NAME (expected two columns: email, RosterType)
+    try {
+      const allRange = rosterSs.getRangeByName(ALL_EMAIL_RANGE_NAME);
+      if (allRange) {
+        const rows = allRange.getDisplayValues();
+        for (let r = 0; r < rows.length; r++) {
+          const email = rows[r][0] ? rows[r][0].toString().trim() : "";
+          const rosterType = rows[r][1] ? rows[r][1].toString().trim() : "";
+          if (email !== "" && rosterType.toLowerCase() === "main") {
+            emailsSet.add(email);
+          }
+        }
+      }
+    } catch (e) {
+      Logger.log("Warning: could not read ALL_EMAIL_RANGE_NAME: " + e);
+    }
+  } catch (e) {
+    Logger.log("Error opening roster spreadsheet for primary list: " + e);
+  }
+
+  return Array.from(emailsSet);
+}
+
+// Build secondary waitlist emails from ROSTER_SPREADSHEET_ID.
+// Secondary = any email in ALL_EMAIL_RANGE_NAME with RosterType == 'SecondaryReserve'
+function getSecondaryWaitlistEmails(dayString) {
+  const emailsSet = new Set();
+  try {
+    const rosterSs = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
+    try {
+      const allRange = rosterSs.getRangeByName(ALL_EMAIL_RANGE_NAME);
+      if (allRange) {
+        const rows = allRange.getDisplayValues();
+        for (let r = 0; r < rows.length; r++) {
+          const email = rows[r][0] ? rows[r][0].toString().trim() : "";
+          const rosterType = rows[r][1] ? rows[r][1].toString().trim() : "";
+          if (email !== "" && rosterType.toLowerCase() === "secondaryreserve") {
+            emailsSet.add(email);
+          }
+        }
+      }
+    } catch (e) {
+      Logger.log("Warning: could not read ALL_EMAIL_RANGE_NAME for secondary list: " + e);
+    }
+  } catch (e) {
+    Logger.log("Error opening roster spreadsheet for secondary list: " + e);
+  }
+
+  return Array.from(emailsSet);
+}
+
+// Test helper: return resolved primary/secondary waitlist lists (no emails sent)
+function getResolvedWaitlistLists() {
+  const primary = getPrimaryWaitlistEmails("");
+  const secondary = getSecondaryWaitlistEmails("");
+  return { primary: primary, secondary: secondary };
+}
+
+// Test helper: log resolved primary and secondary waitlist lists for inspection
+function logResolvedWaitlistLists() {
+  const lists = getResolvedWaitlistLists();
+  Logger.log('--- Resolved Waitlist Lists ---');
+  Logger.log('Primary count: ' + lists.primary.length);
+  Logger.log('Primary emails:\n' + lists.primary.join('\n'));
+  Logger.log('Secondary count: ' + lists.secondary.length);
+  Logger.log('Secondary emails:\n' + lists.secondary.join('\n'));
+  Logger.log('--- End Resolved Waitlist Lists ---');
+  return lists;
 }
 
 // Reads emails for a group either from an external spreadsheet (if constant set)
@@ -564,8 +630,8 @@ function getGameDayStringOfWaitlistEmailsToSendOnDate(currentDate) {
   return dayString;
 }
 
-function getWaitlistEmailThreadForDay(day) {
-  const subject = "\"" + getWaitlistEmailSubjectForDay(day) + "\"";
+function getWaitlistEmailThreadForDayString(dayString) {
+  const subject = "\"" + getWaitlistEmailSubjectForDay(dayString) + "\"";
   const query = "from: " + GHIRSCHHORN_EMAIL + " subject: " + subject;
   return getOnlyEmailThreadForSearchQuery(query);
 }

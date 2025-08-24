@@ -20,3 +20,18 @@ I want to changet the project so the "waitlist" is broken into 2 waitlist groups
 The two waitlists work almost the same -- reminders go out at same time and people reply the same way.  The major difference is that when bulding the randmized order of players to be added to the game on a specific night, the list should be built as follows:
 - first randomize only the primary wait list players
 - then append to that list a list of randomized secondary wait list players
+
+
+
+-----------------------------
+I would like to make some changes as to how the different player types are identified.
+
+1) I currently have a constant ROSTER_SPREADSHEET_ID that identifies a sheet where all players are kept.  This practice will continue with the list holding two types of players:  "Main" players are those on either a roster for one or more of the nights or are on no rosters but are considered for the primary waitlist.  "SecondaryReserve" players are those considerd only for the secondary waitlist.   The sheet holding these players already had a range for Email identified by the constant "ALL_EMAIL_RANGE_NAME".  It was just a 1 column wide list of emails but now the range is 2 colums wide with the first column being email and the second column being a new column  named "RosterType".  RosterType will be one of two values corresponding to the two types of players identified above:  "Main" or "SecondaryReserve".
+
+2) We also currently have constants identifying the range of emails for roster players -- one constant for each of the 3 nights.
+
+3) When building waitlist, use this algorithm:
+- If a player email is in the ALL_EMAIL_RANGE_NAME" with a type or "Main", they are in the primary wait list, even if the are not in the ALL_EMAIL_RANGE_NAME at all.
+
+
+---------------------------

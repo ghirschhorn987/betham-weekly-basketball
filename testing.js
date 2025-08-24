@@ -137,12 +137,12 @@ function test() {
   const outResponsesMap = new Map();
   const otherResponsesMap = new Map();
 
-  var day = "sunday";
-  addWaitlistEmailResponsesToMapsForDay(day, inResponsesMap, outResponsesMap, otherResponsesMap);
+  var dayString = "sunday";
+  addWaitlistEmailResponsesToMapsForDay(dayString, inResponsesMap, outResponsesMap, otherResponsesMap);
 
   Logger.log("==========================\r\nRESPONSE ORDER:\r\n" + arrayAsNumberedNewLineSeparatedString(Array.from(inResponsesMap.keys())) + "\r\n==========================");
   // for (i = 0; i < 100; i++) {
-  //   testShuffleReplys(day);
+  //   testShuffleReplys(dayString);
   // }
 }
 
@@ -161,7 +161,7 @@ function testGetWaitlistResponsesForDateRange() {
   //   var inResponsesMap = new Map();
   //   const outResponsesMap = new Map();
   //   const otherResponsesMap = new Map();
-  //   addWaitlistEmailResponsesToMapsForDay(day, inResponsesMap, outResponsesMap, otherResponsesMap);
+  //   addWaitlistEmailResponsesToMapsForDay(dayString, inResponsesMap, outResponsesMap, otherResponsesMap);
 
   // //Logger.log("\r\nInitial IN:\r\n" + arrayAsNewLineSeparatedString(Array.from(inResponsesMap.keys())));
   // //Logger.log("\r\nInitial OUT:\r\n" + arrayAsNewLineSeparatedString(Array.from(outResponsesMap.keys())));
@@ -171,12 +171,12 @@ function testGetWaitlistResponsesForDateRange() {
   // }
 }
 
-function testShuffleReplys(day) {
+function testShuffleReplys(dayString) {
   var inResponsesMap = new Map();
   const outResponsesMap = new Map();
   const otherResponsesMap = new Map();
 
-  addWaitlistEmailResponsesToMapsForDay(day, inResponsesMap, outResponsesMap, otherResponsesMap);
+  addWaitlistEmailResponsesToMapsForDay(dayString, inResponsesMap, outResponsesMap, otherResponsesMap);
   inResponsesMap = shuffleMap(inResponsesMap);
 
   //Logger.log("\r\nInitial IN:\r\n" + arrayAsNewLineSeparatedString(Array.from(inResponsesMap.keys())));
@@ -242,11 +242,11 @@ function testDateStringLogging(currentDate) {
 }
 
 function testGetWaitlistEmailThread() {
-  const day = "thursday";
+  const dayString = "thursday";
 
   //getWaitlistEmailThread("thursday");
 
-  const subject = "\"" + getWaitlistEmailSubjectForDay(day) + "\"";
+  const subject = "\"" + getWaitlistEmailSubjectForDay(dayString) + "\"";
   const query = "from: " + GHIRSCHHORN_EMAIL + " subject: " + subject;
   const threads = GmailApp.search(query);
 
@@ -324,8 +324,7 @@ function testShuffleMapUnit() {
 
 
 function testRosterCountsPerPlayer() {
-  const emails = getRosterGroupEmails(day);
-
+  const emails = getRosterGroupEmails(dayString);
 }
 
 function testSignupCounts() {
@@ -346,11 +345,11 @@ function testSignupCounts() {
 }
 
 function testDeleteAccidentalCopiesOfSpreadsheets() {
-  const day = "tuesday";
-  const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(day));
+  const dayString = "tuesday";
+  const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
 
   const sheets = spreadsheet.getSheets();
-  Logger.log("sheets for day " + day + ". length=" + sheets.length);
+  Logger.log("sheets for day " + dayString + ". length=" + sheets.length);
   for (const sheet of sheets) {
     Logger.log("sheets name:" + sheet.getName());
     if (sheet.getName().startsWith("Copy of Tue, Feb 18, 8-10pm")) {
@@ -361,11 +360,11 @@ function testDeleteAccidentalCopiesOfSpreadsheets() {
   }
 }
 
-function testSignupCountsRangeNameAndDay(rangeName, day, playerToGameCount) {
-  const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(day));
+function testSignupCountsRangeNameAndDay(rangeName, dayString, playerToGameCount) {
+  const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
 
   const sheets = spreadsheet.getSheets();
-  Logger.log("sheets for day " + day + ". length=" + sheets.length);
+  Logger.log("sheets for day " + dayString + ". length=" + sheets.length);
   for (const sheet of sheets) {
     // Logger.log("sheets name:" + sheet.getName());
     if (getMonthNumberFromRsvpTabName(sheet.getName()) < 6) {
@@ -445,17 +444,17 @@ function testReplyParsingForType(messages, type) {
   }
 }
 
-function testDay(day) {
-  Logger.log("START TESTING day: " + day);
-  //prepareRsvpSpreadsheetForDay(day);
-  //createAndSendRosterEmailForDay(day);
-  //createAndSendWaitlistEmailForDay(day);
-  Logger.log("\n=================================\n Starting Open spots: " + getOpenSpotCount(day));
-  replyInitialToWaitlistEmailResponsesForDay(day);
-  Logger.log("\n=================================\n After Waitlist Open spots: " + getOpenSpotCount(day));
-  replyFinalToWaitlistEmailResponsesForDay(day);
-  Logger.log("\n=================================\n Final Waitlist Open spots: " + getOpenSpotCount(day));
-  Logger.log("END TESTING day: " + day);
+function testDay(dayString) {
+  Logger.log("START TESTING day: " + dayString);
+  //prepareRsvpSpreadsheetForDay(dayString);
+  //createAndSendRosterEmailForDay(dayString);
+  //createAndSendWaitlistEmailForDay(dayString);
+  Logger.log("\n=================================\n Starting Open spots: " + getOpenSpotCount(dayString));
+  replyInitialToWaitlistEmailResponsesForDay(dayString);
+  Logger.log("\n=================================\n After Waitlist Open spots: " + getOpenSpotCount(dayString));
+  replyFinalToWaitlistEmailResponsesForDay(dayString);
+  Logger.log("\n=================================\n Final Waitlist Open spots: " + getOpenSpotCount(dayString));
+  Logger.log("END TESTING day: " + dayString);
 }
 
 function testConstants() {
@@ -500,8 +499,8 @@ function testArray() {
 }
 
 function testForward() {
-  const day = "thursday";
-  const thread = getWaitlistEmailThread(day);
+  const dayString = "thursday";
+  const thread = getWaitlistEmailThread(dayString);
   const messages = thread.getMessages();
 
   Logger.log("messages length=" + messages.length);

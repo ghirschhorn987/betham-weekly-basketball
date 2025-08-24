@@ -1,12 +1,12 @@
 //========================================
 // Roster spreadsheet helper functions
 //========================================
-function getRosterEmailRangeName(day) {
-  switch (day) {
+function getRosterEmailRangeName(dayString) {
+  switch (dayString) {
     case "sunday": return ROSTER_EMAIL_RANGE_NAME_SUNDAY;
     case "tuesday": return ROSTER_EMAIL_RANGE_NAME_TUESDAY;
     case "thursday": return ROSTER_EMAIL_RANGE_NAME_THURSDAY;
-    default: throw new Error("Unknown day: " + day);
+    default: throw new Error("Unknown day: " + dayString);
   }
 }
 
@@ -23,42 +23,42 @@ function getLastStepThatWasRunRange() {
 //========================================
 // Rsvp spreadsheet helper functions
 //========================================
-function getRsvpSpreadsheetId(day) {
+function getRsvpSpreadsheetId(dayString) {
   if (USE_OVERRIDE_VALUES) {
     return OVERRIDE_RSVP_SPREADSHEET_ID;
   }
 
-  switch (day) {
+  switch (dayString) {
     case "sunday": return RSVP_SUNDAY_SPREADSHEET_ID;
     case "tuesday": return RSVP_TUESDAY_SPREADSHEET_ID;
     case "thursday": return RSVP_THURSDAY_SPREADSHEET_ID;
-    default: throw new Error("Unknown day: " + day);
+    default: throw new Error("Unknown day: " + dayString);
   }
 }
 
-function getRsvpSpreadsheetRangeForDay(day, rangeSpec) {
-  const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(day));
-  const nextDate = getDateForNextOccurrenceOfDay(day);
-  const tab = getRsvpTabForDate(spreadsheet, nextDate, day);
+function getRsvpSpreadsheetRangeForDay(dayString, rangeSpec) {
+  const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
+  const nextDate = getDateForNextOccurrenceOfDay(dayString);
+  const tab = getRsvpTabForDate(spreadsheet, nextDate, dayString);
   if (tab == null) {
-    throw new Error("No tab found. spreadsheet=" + spreadsheet.getName() + ", nextDate=" + nextDate + ", day=" + day + ", tabName= " + getRsvpTabNameForDate(nextDate, day));
+    throw new Error("No tab found. spreadsheet=" + spreadsheet.getName() + ", nextDate=" + nextDate + ", day=" + dayString + ", tabName= " + getRsvpTabNameForDate(nextDate, dayString));
   }
   return tab.getRange(rangeSpec);
 }
 
-function getRsvpTabForDate(spreadsheet, date, day) {
-  const tabName = getRsvpTabNameForDate(date, day);
+function getRsvpTabForDate(spreadsheet, date, dayString) {
+  const tabName = getRsvpTabNameForDate(date, dayString);
   return spreadsheet.getSheetByName(tabName);
 }
 
-function getRsvpTabNameForDate(date, day) {
+function getRsvpTabNameForDate(date, dayString) {
   var gameTimeString = null;
   if (isNoGameOnDate(date)) {
     gameTimeString = " - " + NO_GAME_STRING;
   } else {
-    gameTimeString = ", " + getGameTimeString(day);
+    gameTimeString = ", " + getGameTimeString(dayString);
   }
-  return getShortDayName(day) + ", " + date.toLocaleString("en-us", { month: 'short', day: 'numeric' }) + gameTimeString;
+  return getShortDayName(dayString) + ", " + date.toLocaleString("en-us", { month: 'short', day: 'numeric' }) + gameTimeString;
 }
 
 function getMonthNumberFromRsvpTabName(tabName) {
@@ -70,9 +70,9 @@ function getMonthNumberFromRsvpTabName(tabName) {
   return new Date(parts[2]).getMonth();
 }
 
-function getOpenSpotCount(day) {
+function getOpenSpotCount(dayString) {
   var openSpotCount = 0;
-  const range = getRsvpSpreadsheetRangeForDay(day, RSVP_CELLS_IN_GAME_RANGE);
+  const range = getRsvpSpreadsheetRangeForDay(dayString, RSVP_CELLS_IN_GAME_RANGE);
   for (row = 1; row <= range.getHeight(); row++) {
     const cell = range.getCell(row, 1);
     if (cell.isBlank()) {
@@ -82,8 +82,8 @@ function getOpenSpotCount(day) {
   return openSpotCount;
 }
 
-function getPlayerSetFromRsvpWaitlistRange(day) {
-  const waitlistRange = getRsvpSpreadsheetRangeForDay(day, RSVP_CELLS_WAITLIST_RANGE);
+function getPlayerSetFromRsvpWaitlistRange(dayString) {
+  const waitlistRange = getRsvpSpreadsheetRangeForDay(dayString, RSVP_CELLS_WAITLIST_RANGE);
   return getPlayerSetFromRange(waitlistRange);
 }
 
