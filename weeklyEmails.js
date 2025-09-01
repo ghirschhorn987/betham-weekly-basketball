@@ -9,7 +9,7 @@ function runOnce_MANUALLY() {
 
   // for (x=0; x<100; x++) {
   // const lastStepThatWasRunRange = getLastStepThatWasRunRange();
-  //createAndSendWaitlistEmailForDay("thursday");
+  createAndSendWaitlistEmailForDay("thursday");
   //addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["WAITLIST EMAIL"], false);
   //replyInitialToWaitlistEmailResponsesForDay("thursday");
   //addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["INITIAL WAITLIST REPLY"], false);
