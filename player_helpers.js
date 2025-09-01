@@ -183,3 +183,30 @@ function logEmailAddressesAsCommaSeparatedListForTypeAndDay(listType, dayString)
   Logger.log("\n\n==========\n" + listType + " players, " + dayString + ", " + playerList.size + " players:\n=========\n" + Array.from(playerList).join(', ') + "\n==========");
 }
 
+function getRosterMap() {
+  const rosterSheet = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
+  const range = rosterSheet.getRangeByName(ALL_EMAIL_AND_ROSTER_TYPES_RANGE_NAME);
+  const values = range.getValues();
+
+  const rosterMap = {};
+
+  for (let i = 0; i < values.length; i++) {
+    const row = values[i];
+    const player = row[0];
+    const rosterType = row[1];
+
+    if (player && rosterType && rosterType.trim() !== "") {
+      if (!rosterMap[rosterType]) {
+        rosterMap[rosterType] = [];
+      }
+      rosterMap[rosterType].push(player);
+    }
+  }
+
+  return rosterMap;
+}
+
+function getMainPlayers(rosterMap) {
+  return rosterMap[PLAYER_TYPE_MAIN] || [];
+}
+

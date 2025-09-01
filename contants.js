@@ -1,5 +1,4 @@
 //========================================
-// TESTING CLASP 999BB
 // Override certain constants for testing purposes. 
 // WARNING!!! Must set back to null when done for scripts to act correcdly
 //========================================
@@ -30,11 +29,16 @@ const RSVP_SHORT_URL_TUESDAY = "https://bethambasketball.short.gy/tuesday-signup
 const RSVP_SHORT_URL_THURSDAY = "https://bethambasketball.short.gy/thursday-signup";
 
 const ALL_EMAIL_RANGE_NAME = "AllEmails";
+const ALL_EMAIL_AND_ROSTER_TYPES_RANGE_NAME = "AllEmailsAndRosterTypes";
 const ROSTER_EMAIL_RANGE_NAME_TUESDAY = "RosterEmailsTuesday";
 const ROSTER_EMAIL_RANGE_NAME_THURSDAY = "RosterEmailsThursday";
 const ROSTER_EMAIL_RANGE_NAME_SUNDAY = "RosterEmailsSunday";
 const LAST_RUN_DAY_OF_WEEK_RANGE = "LastRunDayOfWeek";
 const LAST_STEP_THAT_WAS_RUN_RANGE = "LastStepThatWasRun";
+
+// Player types
+const PLAYER_TYPE_MAIN = "Main";
+const PLAYER_TYPE_SECONDARY_RESERVE = "SecondaryReserve";
 
 const RSVP_CELLS_RANGE = "C8:G37";
 const RSVP_CELLS_IN_GAME_RANGE = "C8:G22";
@@ -96,3 +100,4 @@ NO_GAME_DATES.add((getDateAsString(new Date("2025-06-03 05:00 PDT"))));
 NO_GAME_DATES.add((getDateAsString(new Date("2025-06-05 05:00 PDT"))));
 NO_GAME_DATES.add((getDateAsString(new Date("2025-06-08 05:00 PDT"))));
 NO_GAME_DATES.add((getDateAsString(new Date("2025-06-10 05:00 PDT"))));
+

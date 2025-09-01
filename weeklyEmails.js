@@ -303,10 +303,10 @@ function getPlayerGroupType(dayString, player) {
         const email = rows[r][0] ? rows[r][0].toString().trim() : "";
         const rosterType = rows[r][1] ? rows[r][1].toString().trim() : "";
         if (email !== "" && email === playerEmail) {
-          if (rosterType.toLowerCase() === "main") {
+          if (rosterType === PLAYER_TYPE_MAIN) {
             return "PrimaryWaitlist";
           }
-          if (rosterType.toLowerCase() === "secondaryreserve") {
+          if (rosterType === PLAYER_TYPE_SECONDARY_RESERVE) {
             return "SecondaryWaitlist";
           }
         }
@@ -417,7 +417,7 @@ function getWaitlistGroupEmails(dayString) {
 }
 
 // Build primary waitlist emails from ROSTER_SPREADSHEET_ID.
-// Primary = any email in ALL_EMAIL_RANGE_NAME with RosterType == 'Main',
+// Primary = any email in ALL_EMAIL_RANGE_NAME with RosterType == PLAYER_TYPE_MAIN
 function getPrimaryWaitlistEmails(dayString) {
   const emailsSet = new Set();
   try {
@@ -430,7 +430,7 @@ function getPrimaryWaitlistEmails(dayString) {
         for (let r = 0; r < rows.length; r++) {
           const email = rows[r][0] ? rows[r][0].toString().trim() : "";
           const rosterType = rows[r][1] ? rows[r][1].toString().trim() : "";
-          if (email !== "" && rosterType.toLowerCase() === "main") {
+          if (email !== "" && rosterType === PLAYER_TYPE_MAIN) {
             emailsSet.add(email);
           }
         }
