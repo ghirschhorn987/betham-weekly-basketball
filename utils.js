@@ -14,6 +14,13 @@ function sendEmail(emailAddressesAsString, subject, body, htmlBody) {
   Logger.log("Email subject: " + subject);
 
   GmailApp.sendEmail(emailAddressesAsString, subject, body, { htmlBody: htmlBody });
+
+  if (USE_OVERRIDE_VALUES && OVERRIDE_LOG_EMAIL_INSTEAD_OF_SENDING) {
+    Logger.log("Logging email instead of sending it.");
+    Logger.log("Body: " + htmlBody);
+  } else {
+    GmailApp.sendEmail(emailAddressesAsString, subject, body, { htmlBody: htmlBody });
+  }
 }
 
 function forwardEmail(thread, emailAddressesAsString, additionalHtmlBody, firstOrLast) {
@@ -53,7 +60,13 @@ function forwardEmail(thread, emailAddressesAsString, additionalHtmlBody, firstO
     + "<br>Cc: " + encodeHtml(messageToForward.getCc())
     + "<br><br>"
     + messageToForward.getBody();
-  messageToForward.forward(emailAddressesAsString, { htmlBody: additionalHtmlBody + previousMessagesAsHtml });
+
+  if (USE_OVERRIDE_VALUES && OVERRIDE_LOG_EMAIL_INSTEAD_OF_SENDING) {
+    Logger.log("Logging email instead of sending it.");
+    Logger.log("Body: " + additionalHtmlBody + previousMessagesAsHtml);
+  } else {
+    messageToForward.forward(emailAddressesAsString, { htmlBody: additionalHtmlBody + previousMessagesAsHtml, cc: messageToForward.getCc() });
+  }
 }
 
 //========================================

@@ -261,7 +261,7 @@ function addWaitlistEmailResponsesToMapsForDayByGroup(dayString, inResponsesMapP
     var msg = messages[i];
     var latestReply = msg.getPlainBody();
     var player = normalizePlayer(msg.getFrom());
-    var groupType = getPlayerGroupType(dayString, player); // You need to implement this helper
+    var groupType = getPlayerGroupType(dayString, player);
 
     if (isInGameReply(latestReply)) {
       if (groupType === "PrimaryWaitlist") {

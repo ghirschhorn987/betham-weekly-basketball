@@ -3,12 +3,13 @@
 // Override certain constants for testing purposes. 
 // WARNING!!! Must set back to null when done for scripts to act correcdly
 //========================================
-var USE_OVERRIDE_VALUES = false;
+var USE_OVERRIDE_VALUES = true;
 
 const OVERRIDE_EMAIL_RECIPIENT_LIST = "ghirschhorn987@gmail.com";
-const OVERRIDE_RSVP_SPREADSHEET_ID = "109YDYVRFoG6qhv8nS2up3aZXBBWm-BCGjuXwv70-6sE"; // "SCRATCH COPY: Beth Am THURSDAY Basketball - RSVP"
-const OVERRIDE_ROSTER_EMAIL_SUBJECT = "Beth Am SUNDAY Basketball: Sign up for Sunday, Aug 28, 7-9pm";
+const OVERRIDE_RSVP_SPREADSHEET_ID = "1tTdOgJaba8QwJBtt2iiXJGbdXE91jSw2Ps6ZP2F2HX8"; // "SCRATCH COPY:  Beth Am THURSDAY Basketball - RSVP"
+const OVERRIDE_ROSTER_EMAIL_SUBJECT = "TESTING - IGNORE THIS. Beth Am Basketball: Sign up for Thursday, Aug 28, 7-9pm";
 const OVERRIDE_WAITLIST_EMAIL_SUBJECT = "Beth Am SUNDAY Basketball: Possible open spots for tonight, Aug 28, 7-9pm";
+const OVERRIDE_LOG_EMAIL_INSTEAD_OF_SENDING = true; // if USE_OVERRIDE_VALUES is true, AND this is true, will log email instead of sending it
 
 //========================================
 // Production constants
