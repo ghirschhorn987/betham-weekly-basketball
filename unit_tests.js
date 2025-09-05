@@ -6,7 +6,7 @@ function runAllTests() {
   testGetRosterTypeToPlayerStrings();
   testGetMainRosterPlayerStrings();
   testGetSecondaryReserveRosterPlayerStrings();
-  testCreateAndSendWaitlistEmailForDay();
+  testCreateAndSendWaitlistEmailForGameDate();
   testGetWaitlistGroupEmails();
   testIsMainRosterPlayerString();
 
@@ -106,13 +106,13 @@ function testGetSecondaryReserveRosterPlayerStrings() {
   }
 }
 
-function testCreateAndSendWaitlistEmailForDay() {
-  Logger.log("Running test: testCreateAndSendWaitlistEmailForDay...");
+function testCreateAndSendWaitlistEmailForGameDate() {
+  Logger.log("Running test: testCreateAndSendWaitlistEmailForGameDate...");
 
   // Mock dependencies
   const originalSendEmail = sendEmail;
   const originalGetWaitlistGroupEmails = getWaitlistGroupEmails;
-  const originalGetWaitlistEmailSubjectForDay = getWaitlistEmailSubjectForDay;
+  const originalGetWaitlistEmailSubjectForGameDate = getWaitlistEmailSubjectForGameDate;
   const originalGetWaitlistEmailBody = getWaitlistEmailBody;
 
   let emailSent = false;
@@ -132,7 +132,7 @@ function testCreateAndSendWaitlistEmailForDay() {
       return "test@example.com";
     };
 
-    getWaitlistEmailSubjectForDay = function (dayString) {
+    getWaitlistEmailSubjectForGameDate = function (gameDate) {
       return "Test Subject";
     };
 
@@ -141,7 +141,8 @@ function testCreateAndSendWaitlistEmailForDay() {
     };
 
     // Run the function
-    createAndSendWaitlistEmailForDay("tuesday");
+    const gameDate = getDateForNextOccurrenceOfDay("tuesday");
+    createAndSendWaitlistEmailForGameDate(gameDate);
 
     // Assertions
     if (!emailSent) {
@@ -165,7 +166,7 @@ function testCreateAndSendWaitlistEmailForDay() {
     // Restore original functions
     sendEmail = originalSendEmail;
     getWaitlistGroupEmails = originalGetWaitlistGroupEmails;
-    getWaitlistEmailSubjectForDay = originalGetWaitlistEmailSubjectForDay;
+    getWaitlistEmailSubjectForGameDate = originalGetWaitlistEmailSubjectForGameDate;
     getWaitlistEmailBody = originalGetWaitlistEmailBody;
   }
 }

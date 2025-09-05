@@ -16,7 +16,7 @@ function getRosterEmailSubject(dayString) {
 }
 
 function getWaitlistEmailSubjectForGameDate(gameDate) {
-  const gameDayString = getDayStringForDate(gameDate);
+  const gameDayString = getDateAsDayString(gameDate);
   var subject;
   if (USE_OVERRIDE_VALUES) {
     subject = OVERRIDE_WAITLIST_EMAIL_SUBJECT;
