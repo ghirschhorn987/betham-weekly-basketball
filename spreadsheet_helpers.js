@@ -70,10 +70,11 @@ function getMonthNumberFromRsvpTabName(tabName) {
   return new Date(parts[2]).getMonth();
 }
 
-function getOpenSpotCount(dayString) {
-  var openSpotCount = 0;
+function getOpenSpotCountForDate(date) {
+  const dayString = getDateAsDayString(date);
   const range = getRsvpSpreadsheetRangeForDayString(dayString, RSVP_CELLS_IN_GAME_RANGE);
-  for (row = 1; row <= range.getHeight(); row++) {
+  let openSpotCount = 0;
+  for (let row = 1; row <= range.getHeight(); row++) {
     const cell = range.getCell(row, 1);
     if (cell.isBlank()) {
       openSpotCount++;

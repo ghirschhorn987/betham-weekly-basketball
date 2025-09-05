@@ -52,10 +52,10 @@ function runEveryMinute() {
   // These variables represent which game emails need to be sent out on the current date. 
   // An empty string means not to send emails that day.
   // Roster emails are sent a few days in advance, waitlist emails are sent on game day.
-  const rosterDayString = getGameDayStringOfRosterEmailsToSendOnDate(currentDate);
-  var rosterDate;
-  if (rosterDayString != "") {
-    rosterDate = getDateForNextOccurrenceOfDay(rosterDayString);
+  const gameDayString = getGameDayStringOfRosterEmailsToSendOnDate(currentDate);
+  var gameDate;
+  if (gameDayString != "") {
+    gameDate = getDateForNextOccurrenceOfDay(gameDayString);
   }
   const waitlistDayString = getGameDayStringOfWaitlistEmailsToSendOnDate(currentDate);
 
@@ -64,8 +64,8 @@ function runEveryMinute() {
   Logger.log("currentHourOfDay=" + currentHourOfDay);
   Logger.log("lastRunDayOfWeek=" + lastRunDayOfWeek);
   Logger.log("lastStepThatWasRun=" + lastStepThatWasRun);
-  Logger.log("rosterDayString=" + rosterDayString);
-  Logger.log("rosterDate=" + rosterDate);
+  Logger.log("gameDayString=" + gameDayString);
+  Logger.log("gameDate=" + gameDate);
   Logger.log("waitlistDayString=" + waitlistDayString);
 
   if (currentDayOfWeek != lastRunDayOfWeek) {
@@ -75,31 +75,31 @@ function runEveryMinute() {
 
   } else if (currentHourOfDay >= 6 && currentHourOfDay <= 7) {
     // Between 6am and 7:59am: crete rsvp spreadsheet if not created
-    if (rosterDayString != "" && lastStepThatWasRun != "CREATE RSVP SPREADSHEET") {
+    if (gameDayString != "" && lastStepThatWasRun != "CREATE RSVP SPREADSHEET") {
       //prepareRsvpSpreadsheetForDay(rosterDayString);
-      prepareRsvpSpreadsheetForDate(rosterDate);
+      prepareRsvpSpreadsheetForDate(gameDate);
       addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["CREATE RSVP SPREADSHEET"], false);
     }
   }
 
   else if (currentHourOfDay >= 8 && currentHourOfDay <= 9) {
     // Between 8am and 9:59am: send roster emails if not sent
-    if (rosterDayString != "" && lastStepThatWasRun != "ROSTER EMAIL") {
-      createAndSendRosterEmailForDateAndDay(rosterDate, rosterDayString);
+    if (gameDayString != "" && lastStepThatWasRun != "ROSTER EMAIL") {
+      createAndSendRosterEmailForDate(gameDate);
       addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["ROSTER EMAIL"], false);
     }
 
   } else if (currentHourOfDay == 12) {
     // At 12 noon: send waitlist emails if not sent
     if (waitlistDayString != "" && lastStepThatWasRun != "WAITLIST EMAIL") {
-      createAndSendWaitlistEmailForDay(waitlistDayString);
+      createAndSendWaitlistEmailForGameDate(gameDate);
       addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["WAITLIST EMAIL"], false);
     }
 
   } else if (currentHourOfDay == 13) {
     // At 1 pm: send initial waitlist reply if not sent
     if (waitlistDayString != "" && lastStepThatWasRun != "INITIAL WAITLIST REPLY") {
-      replyInitialToWaitlistEmailResponsesForDay(waitlistDayString);
+      replyInitialToWaitlistEmailResponsesForGameDate(gameDate);
       addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["INITIAL WAITLIST REPLY"], false);
     }
 
@@ -191,40 +191,44 @@ function hideRsvpTabForDate(date) {
   oldTab.hideSheet();
 }
 
-function createAndSendRosterEmailForDateAndDay(date, dayString) {
-  if (isNoGameOnDate(date)) {
-    Logger.log("Not creating and sending roster emails because no game. day=" + dayString + ", date=" + date);
+function createAndSendRosterEmailForDate(gameDate) {
+  const gameDayString = getDateAsDayString(gameDate);
+  if (isNoGameOnDate(gameDate)) {
+    Logger.log("Not creating and sending roster emails because no game. day=" + gameDayString + ", date=" + gameDate);
     return;
   }
 
-  Logger.log("Creating and sending roster emails for day=" + dayString + ", date=" + date);
-  const emails = getRosterGroupEmails(dayString);
-  const subject = getRosterEmailSubject(dayString);
-  const body = getRosterEmailBody(dayString, false);
-  const htmlBody = getRosterEmailBody(dayString, true);
+  Logger.log("Creating and sending roster emails for day=" + gameDayString + ", date=" + gameDate);
+  const emails = getRosterGroupEmails(gameDayString);
+  const subject = getRosterEmailSubject(gameDayString);
+  const body = getRosterEmailBody(gameDayString, false);
+  const htmlBody = getRosterEmailBody(gameDayString, true);
   sendEmail(emails, subject, body, htmlBody);
-  Logger.log("Finished creating and sending roster emails for day=" + dayString + ", date=" + date);
+  Logger.log("Finished creating and sending roster emails for day=" + gameDayString + ", date=" + gameDate);
 }
 
-function createAndSendWaitlistEmailForDay(dayString) {
-  Logger.log("Sending waitlist emails for day: " + dayString);
-  const emails = getWaitlistGroupEmails(dayString);
-  const subject = getWaitlistEmailSubjectForDay(dayString);
-  const body = getWaitlistEmailBody(dayString, false);
-  const htmlBody = getWaitlistEmailBody(dayString, true);
+function createAndSendWaitlistEmailForGameDate(gameDate) {
+  const gameDayString = getDateAsDayString(gameDate);
+  Logger.log("Sending waitlist emails for day=" + gameDayString + ", date=" + gameDate);
+  const emails = getWaitlistGroupEmails(gameDayString);
+  const subject = getWaitlistEmailSubjectForGameDate(gameDate);
+  const body = getWaitlistEmailBody(gameDayString, false);
+  const htmlBody = getWaitlistEmailBody(gameDayString, true);
   sendEmail(emails, subject, body, htmlBody);
-  Logger.log("Finished sending waitlist emails for day: " + dayString);
+  Logger.log("Finished sending waitlist emails for day=" + gameDayString + ", date=" + gameDate);
 }
 
-function replyInitialToWaitlistEmailResponsesForDay(dayString) {
-  Logger.log("Initial replying to waitlist email responses for day: " + dayString);
+function replyInitialToWaitlistEmailResponsesForGameDate(gameDate) {
+  const gameDayString = getDateAsDayString(gameDate);
+  Logger.log("Initial replying to waitlist email responses for day=" + gameDayString + ", gameDate=" + gameDate);
+
   var inResponsesMapPrimary = new Map();
   var inResponsesMapSecondary = new Map();
   const outResponsesMap = new Map();
   const otherResponsesMap = new Map();
 
   // Collect responses and classify by group
-  addWaitlistEmailResponsesToMapsForDayByGroup(dayString, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap);
+  addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap);
 
   // Randomize each group separately
   inResponsesMapPrimary = shuffleMap(inResponsesMapPrimary);
@@ -235,29 +239,30 @@ function replyInitialToWaitlistEmailResponsesForDay(dayString) {
   Logger.log("\r\nInitial OUT:\r\n" + arrayAsNewLineSeparatedString(Array.from(outResponsesMap.keys())));
   Logger.log("\r\nInitial OTHER:\r\n" + arrayAsNewLineSeparatedString(Array.from(otherResponsesMap.keys())));
 
-  const openSpotCount = getOpenSpotCount(dayString);
-  Logger.log("Open spots: " + openSpotCount);
+  const openSpotCount = getOpenSpotCountForDate(gameDate);
+  Logger.log("Open spots for " + getDateAsString(gameDate) + ": " + openSpotCount);
 
   // Add primary first, then secondary
-  const range = getRsvpSpreadsheetRangeForDayString(dayString, RSVP_CELLS_WAITLIST_RANGE);
+  const range = getRsvpSpreadsheetRangeForDayString(gameDayString, RSVP_CELLS_WAITLIST_RANGE);
   const playersAddedArray = addValuesArrayToSpreadsheetRange(
     range,
     [...Array.from(inResponsesMapPrimary.keys()), ...Array.from(inResponsesMapSecondary.keys())],
     true
   );
 
-  const thread = getWaitlistEmailThreadForDayString(dayString);
-  const htmlBody = getInitialWaitlistReplyEmailBody(dayString, openSpotCount, playersAddedArray, true);
+  const thread = getWaitlistEmailThreadForGameDate(gameDate);
+  const htmlBody = getInitialWaitlistReplyEmailBody(gameDayString, openSpotCount, playersAddedArray, true);
   forwardEmail(thread, EMAIL_GROUP_ADMINS + "," + playersAddedArray.toString(), htmlBody, "first");
 
-  Logger.log("Finished initial replying to waitlist email responses for day: " + dayString);
+  Logger.log("Finished initial replying to waitlist email responses for day=" + gameDayString + ", gameDate=" + gameDate);
 }
 
 // Helper to classify responses by group
-function addWaitlistEmailResponsesToMapsForDayByGroup(dayString, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap) {
-  Logger.log("addWaitlistEmailResponsesToMapsForDayByGroup(dayString). dayString=" + dayString);
+function addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap) {
+  const dayString = getDateAsDayString(gameDate);
+  Logger.log("addWaitlistEmailResponsesToMapsForDayByGroup(dayString). dayString=" + dayString + ", gameDate=" + gameDate);
 
-  const thread = getWaitlistEmailThreadForDayString(dayString);
+  const thread = getWaitlistEmailThreadForGameDate(gameDate);
   const messages = thread.getMessages();
   for (var i = 0; i < messages.length; i++) {
     var msg = messages[i];
@@ -578,14 +583,8 @@ function getGameDayStringOfWaitlistEmailsToSendOnDate(currentDate) {
   return dayString;
 }
 
-function getWaitlistEmailThreadForDayString(dayString) {
-  const subject = "\"" + getWaitlistEmailSubjectForDay(dayString) + "\"";
-  const query = "from: " + GHIRSCHHORN_EMAIL + " subject: " + subject;
-  return getOnlyEmailThreadForSearchQuery(query);
-}
-
-function getWaitlistEmailThreadForDate(date) {
-  const subject = "\"" + getWaitlistEmailSubjectForDate(date) + "\"";
+function getWaitlistEmailThreadForGameDate(gameDate) {
+  const subject = "\"" + getWaitlistEmailSubjectForGameDate(gameDate) + "\"";
   const query = "from: " + GHIRSCHHORN_EMAIL + " subject: " + subject;
   return getOnlyEmailThreadForSearchQuery(query);
 }

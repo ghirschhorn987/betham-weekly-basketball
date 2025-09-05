@@ -15,36 +15,26 @@ function getRosterEmailSubject(dayString) {
   return subject;
 }
 
-function getWaitlistEmailSubjectForDay(dayString) {
+function getWaitlistEmailSubjectForGameDate(gameDate) {
+  const gameDayString = getDayStringForDate(gameDate);
   var subject;
   if (USE_OVERRIDE_VALUES) {
     subject = OVERRIDE_WAITLIST_EMAIL_SUBJECT;
   } else {
     subject = "Beth Am <<DAY_UPPERCASE>> Basketball: Possible open spots for tonight, <<DATE>>, <<GAME_TIME>>";
-    subject = subject.replace("<<DAY_UPPERCASE>>", dayString.toUpperCase());
-    subject = subject.replace("<<DATE>>", getDateAsString(getDateForNextOccurrenceOfDay(dayString)));
-    subject = subject.replace("<<GAME_TIME>>", getGameTimeString(dayString));
+    subject = subject.replace("<<DAY_UPPERCASE>>", gameDayString.toUpperCase());
+    subject = subject.replace("<<DATE>>", getDateAsString(gameDate));
+    subject = subject.replace("<<GAME_TIME>>", getGameTimeString(gameDayString));
   }
   return subject;
 }
 
-function getWaitlistEmailSubjectForDate(date) {
-  var subject;
-  if (USE_OVERRIDE_VALUES) {
-    subject = OVERRIDE_WAITLIST_EMAIL_SUBJECT;
-  } else {
-    subject = "Basketball: Possible open spots for tonight, <<DATE>>";
-    subject = subject.replace("<<DATE>>", getDateAsString(date));
-  }
-  return subject;
+function getInitialWaitlistReplyEmailSubjectForGameDate(gameDate) {
+  return getWaitlistEmailSubjectForGameDate(gameDate);
 }
 
-function getInitialWaitlistReplyEmailSubjectForDay(dayString) {
-  return getWaitlistEmailSubjectForDay(dayString);
-}
-
-function getFinalWaitlistReplyEmailSubjectForDay(dayString) {
-  return getWaitlistEmailSubjectForDay(dayString);
+function getFinalWaitlistReplyEmailSubjectForGameDate(gameDate) {
+  return getWaitlistEmailSubjectForGameDate(gameDate);
 }
 
 function getRosterEmailBody(dayString, useHtml) {
