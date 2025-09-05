@@ -206,7 +206,7 @@ function getRosterMap() {
   return rosterMap;
 }
 
-function getMainPlayers(rosterMap) {
+function getMainRosterPlayers(rosterMap) {
   return rosterMap[PLAYER_TYPE_MAIN] || [];
 }
 
