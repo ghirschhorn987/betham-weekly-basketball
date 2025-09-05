@@ -13,6 +13,8 @@ function runAllTests() {
 }
 
 function testGetRosterMap() {
+  Logger.log("Running test: testGetRosterMap...");
+
   // Mock SpreadsheetApp
   const originalSpreadsheetApp = SpreadsheetApp;
   try {
@@ -30,8 +32,7 @@ function testGetRosterMap() {
                   ["player4 <email4@d.com>", ""],
                   ["player5 <email5@e.com>", "SecondaryReserve"],
                   ["player6 <email6@f.com>", "Main"],
-                  ["emailonly@g.com", "Main"],
-                ["emailonly@g.com", "Main"]
+                  ["emailonly@g.com", "Main"]
                 ];
               }
             };
@@ -171,36 +172,41 @@ function testCreateAndSendWaitlistEmailForDay() {
 function testGetWaitlistGroupEmails() {
   Logger.log("Running test: testGetWaitlistGroupEmails...");
 
-  // Mock dependencies
-  const originalGetPrimaryWaitlistEmails = getPrimaryWaitlistEmails;
-  const originalGetSecondaryWaitlistEmails = getSecondaryWaitlistEmails;
+  // No mocks needed as the function is now deterministic based on constants.
 
-  try {
-    getPrimaryWaitlistEmails = function (dayString) {
-      return ["primary1@example.com", "primary2@example.com"];
-    };
+  // Test for Tuesday
+  const tuesdayEmails = getWaitlistGroupEmails("tuesday");
+  const expectedTuesdayEmails = EMAIL_GROUP_RESERVES + ", " + EMAIL_GROUP_ROSTER_NON_TUESDAY + ", " + EMAIL_GROUP_ADMINS;
 
-    getSecondaryWaitlistEmails = function (dayString) {
-      return ["secondary1@example.com"];
-    };
+  if (tuesdayEmails !== expectedTuesdayEmails) {
+    Logger.log("Test Failed (Tuesday): getWaitlistGroupEmails returned incorrect emails.");
+    Logger.log("Expected: " + expectedTuesdayEmails);
+    Logger.log("Got: " + tuesdayEmails);
+  } else {
+    Logger.log("Test Passed (Tuesday): getWaitlistGroupEmails works as expected.");
+  }
 
-    // Run the function
-    const waitlistEmails = getWaitlistGroupEmails("tuesday");
+  // Test for Sunday
+  const sundayEmails = getWaitlistGroupEmails("sunday");
+  const expectedSundayEmails = EMAIL_GROUP_RESERVES + ", " + EMAIL_GROUP_ROSTER_NON_SUNDAY + ", " + EMAIL_GROUP_ADMINS;
 
-    // Assertions
-    const expectedEmails = "primary1@example.com,primary2@example.com,secondary1@example.com," + EMAIL_GROUP_ADMINS;
-    const expectedEmailsWithSpaces = ["primary1@example.com", "primary2@example.com", "secondary1@example.com", EMAIL_GROUP_ADMINS].join(", ");
+  if (sundayEmails !== expectedSundayEmails) {
+    Logger.log("Test Failed (Sunday): getWaitlistGroupEmails returned incorrect emails.");
+    Logger.log("Expected: " + expectedSundayEmails);
+    Logger.log("Got: " + sundayEmails);
+  } else {
+    Logger.log("Test Passed (Sunday): getWaitlistGroupEmails works as expected.");
+  }
 
-    if (waitlistEmails !== expectedEmailsWithSpaces) {
-      Logger.log("Test Failed: getWaitlistGroupEmails returned incorrect emails.");
-      Logger.log("Expected: " + expectedEmailsWithSpaces);
-      Logger.log("Got: " + waitlistEmails);
-    } else {
-      Logger.log("Test Passed: getWaitlistGroupEmails works as expected.");
-    }
-  } finally {
-    // Restore original functions
-    getPrimaryWaitlistEmails = originalGetPrimaryWaitlistEmails;
-    getSecondaryWaitlistEmails = originalGetSecondaryWaitlistEmails;
+  // Test for Thursday
+  const thursdayEmails = getWaitlistGroupEmails("thursday");
+  const expectedThursdayEmails = EMAIL_GROUP_RESERVES + ", " + EMAIL_GROUP_ROSTER_NON_THURSDAY + ", " + EMAIL_GROUP_ADMINS;
+
+  if (thursdayEmails !== expectedThursdayEmails) {
+    Logger.log("Test Failed (Thursday): getWaitlistGroupEmails returned incorrect emails.");
+    Logger.log("Expected: " + expectedThursdayEmails);
+    Logger.log("Got: " + thursdayEmails);
+  } else {
+    Logger.log("Test Passed (Thursday): getWaitlistGroupEmails works as expected.");
   }
 }
