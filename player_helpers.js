@@ -2,9 +2,9 @@
 // Player helper functions
 // (player is a string in "name <email>" form)
 //========================================
-function normalizePlayer(player) {
-  const name = getNameFromPlayer(player);
-  const email = getEmailFromPlayer(player);
+function normalizePlayerString(playerString) {
+  const name = getNameFromPlayerString(playerString);
+  const email = getEmailFromPlayerString(playerString);
   if (name == "") {
     return email;
   } else {
@@ -12,30 +12,30 @@ function normalizePlayer(player) {
   }
 }
 
-function playersAreEqual(player1, player2) {
-  return getNameFromPlayer(player1) == getNameFromPlayer(player2)
-    && getEmailFromPlayer(player1) == getEmailFromPlayer(player2);
+function playerStringsAreEqual(playerString1, playerString2) {
+  return getNameFromPlayerString(playerString1) == getNameFromPlayerString(playerString2)
+    && getEmailFromPlayerString(playerString1) == getEmailFromPlayerString(playerString2);
 }
 
-function getNameFromPlayer(player) {
+function getNameFromPlayerString(playerString) {
   var name;
-  const indexOfLessThanSign = player.indexOf("<");
+  const indexOfLessThanSign = playerString.indexOf("<");
   if (indexOfLessThanSign == -1) {
     name = "";
   } else {
-    name = player.substring(0, indexOfLessThanSign);
+    name = playerString.substring(0, indexOfLessThanSign);
   }
   return name.trim();
 }
 
-function getEmailFromPlayer(player) {
+function getEmailFromPlayerString(playerString) {
   var email;
-  const indexOfLessThanSign = player.indexOf("<");
+  const indexOfLessThanSign = playerString.indexOf("<");
   if (indexOfLessThanSign == -1) {
-    email = player;
+    email = playerString;
   } else {
-    const indexOfGreaterThanSign = player.indexOf(">");
-    email = player.substring(indexOfLessThanSign + 1, indexOfGreaterThanSign);
+    const indexOfGreaterThanSign = playerString.indexOf(">");
+    email = playerString.substring(indexOfLessThanSign + 1, indexOfGreaterThanSign);
   }
 
   // Remove things after plus sign from emails like "+canned-response@gmail.com"
@@ -48,19 +48,19 @@ function getEmailFromPlayer(player) {
   return email.trim();
 }
 
-function removeDuplicatePlayersFromSet(playerSet) {
+function removeDuplicatePlayersFromSet(playerStringSet) {
   const modifiedPlayerSet = new Set();
   const existingNames = new Set();
   const existingEmails = new Set();
-  playerSet.forEach(function (player) {
-    const name = getNameFromPlayer(player);
-    const email = getEmailFromPlayer(player);
+  playerStringSet.forEach(function (playerString) {
+    const name = getNameFromPlayerString(playerString);
+    const email = getEmailFromPlayerString(playerString);
     if (existingNames.has(name) || existingEmails.has(email)) {
-      Logger.log("Removing duplicate player from set: " + player);
+      Logger.log("Removing duplicate player from set: " + playerString);
     } else {
       existingNames.add(name);
       existingEmails.add(email);
-      modifiedPlayerSet.add(player);
+      modifiedPlayerSet.add(playerString);
     }
   });
   return modifiedPlayerSet;
@@ -71,8 +71,8 @@ function removePlayersAlreadyInOtherSet(sourcePlayerSet, otherPlayerSet) {
   const otherSetNames = new Set();
   const otherSetEmails = new Set();
   otherPlayerSet.forEach(function (player) {
-    const name = getNameFromPlayer(player);
-    const email = getEmailFromPlayer(player);
+    const name = getNameFromPlayerString(player);
+    const email = getEmailFromPlayerString(player);
     otherSetNames.add(name);
     otherSetEmails.add(email);
   });
@@ -80,8 +80,8 @@ function removePlayersAlreadyInOtherSet(sourcePlayerSet, otherPlayerSet) {
   // Only keep source if neither name nor emamil already included.
   const modifiedSourcePlayerSet = new Set();
   sourcePlayerSet.forEach(function (player) {
-    const name = getNameFromPlayer(player);
-    const email = getEmailFromPlayer(player);
+    const name = getNameFromPlayerString(player);
+    const email = getEmailFromPlayerString(player);
     if (otherSetNames.has(name) || otherSetEmails.has(email)) {
       // Logger.log("Removing player in other set from set: " + player);
     } else {
@@ -92,24 +92,24 @@ function removePlayersAlreadyInOtherSet(sourcePlayerSet, otherPlayerSet) {
   return modifiedSourcePlayerSet;
 }
 
-function addPlayerToMap(map, player, latestReply) {
+function addPlayerStringToMap(map, playerString, latestReply) {
   for (const existingPlayer of map.keys()) {
-    if (playersAreEqual(existingPlayer, player)) {
+    if (playerStringsAreEqual(existingPlayer, playerString)) {
       map.set(existingPlayer, latestReply);
       return;
     }
   }
-  map.set(player, latestReply);
+  map.set(playerString, latestReply);
 }
 
-function deletePlayerFromMap(map, player) {
-  for (const existingPlayer of map.keys()) {
-    if (playersAreEqual(existingPlayer, player)) {
-      map.delete(existingPlayer);
+function deletePlayerStringFromMap(map, playerString) {
+  for (const existingPlayerString of map.keys()) {
+    if (playerStringsAreEqual(existingPlayerString, playerString)) {
+      map.delete(existingPlayerString);
       return;
     }
   }
-  map.delete(player);
+  map.delete(playerString);
 }
 
 function logEmailAddressesAsCommaSeparatedList() {
@@ -183,33 +183,38 @@ function logEmailAddressesAsCommaSeparatedListForTypeAndDay(listType, dayString)
   Logger.log("\n\n==========\n" + listType + " players, " + dayString + ", " + playerList.size + " players:\n=========\n" + Array.from(playerList).join(', ') + "\n==========");
 }
 
-function getRosterMap() {
+function getRosterTypeToPlayerStrings() {
   const rosterSheet = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
   const range = rosterSheet.getRangeByName(ALL_EMAIL_AND_ROSTER_TYPES_RANGE_NAME);
   const values = range.getValues();
 
-  const rosterMap = {};
+  const rosterTypeToPlayerStrings = {};
 
   for (let i = 0; i < values.length; i++) {
     const row = values[i];
-    const player = row[0];
+    const playerString = row[0];
     const rosterType = row[1];
 
-    if (player && rosterType && rosterType.trim() !== "") {
-      if (!rosterMap[rosterType]) {
-        rosterMap[rosterType] = [];
+    if (playerString && rosterType && rosterType.trim() !== "") {
+      if (!rosterTypeToPlayerStrings[rosterType]) {
+        rosterTypeToPlayerStrings[rosterType] = [];
       }
-      rosterMap[rosterType].push(player);
+      rosterTypeToPlayerStrings[rosterType].push(playerString);
     }
   }
 
-  return rosterMap;
+  return rosterTypeToPlayerStrings;
 }
 
-function getMainRosterPlayers(rosterMap) {
+function getMainRosterPlayerStrings(rosterMap) {
   return rosterMap[PLAYER_TYPE_MAIN] || [];
 }
 
-function getSecondaryReserveRosterPlayers(rosterMap) {
+function getSecondaryReserveRosterPlayerStrings(rosterMap) {
   return rosterMap[PLAYER_TYPE_SECONDARY_RESERVE] || [];
+}
+
+function isMainRosterPlayerString(playerString, rosterTypeToPlayerStrings) {
+  const mainPlayers = rosterTypeToPlayerStrings[PLAYER_TYPE_MAIN] || [];
+  return mainPlayers.includes(playerString);
 }

@@ -3,17 +3,18 @@
 function runAllTests() {
   Logger.log("Starting test suite...");
 
-  testGetRosterMap();
-  testGetMainRosterPlayers();
-  testGetSecondaryReserveRosterPlayers();
+  testGetRosterTypeToPlayerStrings();
+  testGetMainRosterPlayerStrings();
+  testGetSecondaryReserveRosterPlayerStrings();
   testCreateAndSendWaitlistEmailForDay();
   testGetWaitlistGroupEmails();
+  testIsMainRosterPlayerString();
 
   Logger.log("Test suite finished.");
 }
 
-function testGetRosterMap() {
-  Logger.log("Running test: testGetRosterMap...");
+function testGetRosterTypeToPlayerStrings() {
+  Logger.log("Running test: testGetRosterTypeToPlayerStrings...");
 
   // Mock SpreadsheetApp
   const originalSpreadsheetApp = SpreadsheetApp;
@@ -41,29 +42,29 @@ function testGetRosterMap() {
       }
     };
 
-    const rosterMap = getRosterMap();
+    const rosterTypeToPlayerStrings = getRosterTypeToPlayerStrings();
 
     // Assertions
-    const mainPlayers = rosterMap[PLAYER_TYPE_MAIN];
-    const secondaryPlayers = rosterMap[PLAYER_TYPE_SECONDARY_RESERVE];
+    const mainPlayerStrings = rosterTypeToPlayerStrings[PLAYER_TYPE_MAIN];
+    const secondaryPlayerStrings = rosterTypeToPlayerStrings[PLAYER_TYPE_SECONDARY_RESERVE];
 
-    if (!mainPlayers || mainPlayers.length !== 4) {
-      Logger.log("Test Failed: Expected 4 main players, but found " + (mainPlayers ? mainPlayers.length : 0));
+    if (!mainPlayerStrings || mainPlayerStrings.length !== 4) {
+      Logger.log("Test Failed: Expected 4 main players, but found " + (mainPlayerStrings ? mainPlayerStrings.length : 0));
     } else {
       Logger.log("Test Passed: Correct number of main players.");
     }
 
-    if (!secondaryPlayers || secondaryPlayers.length !== 2) {
-      Logger.log("Test Failed: Expected 2 secondary players, but found " + (secondaryPlayers ? secondaryPlayers.length : 0));
+    if (!secondaryPlayerStrings || secondaryPlayerStrings.length !== 2) {
+      Logger.log("Test Failed: Expected 2 secondary players, but found " + (secondaryPlayerStrings ? secondaryPlayerStrings.length : 0));
     } else {
       Logger.log("Test Passed: Correct number of secondary players.");
     }
 
     const expectedMain = ["player1 <email1@a.com>", "player3 <email3@c.com>", "player6 <email6@f.com>", "emailonly@g.com"];
-    if (JSON.stringify(mainPlayers) !== JSON.stringify(expectedMain)) {
+    if (JSON.stringify(mainPlayerStrings) !== JSON.stringify(expectedMain)) {
       Logger.log("Test Failed: Main player list does not match expected.");
       Logger.log("Expected: " + JSON.stringify(expectedMain));
-      Logger.log("Got: " + JSON.stringify(mainPlayers));
+      Logger.log("Got: " + JSON.stringify(mainPlayerStrings));
     } else {
       Logger.log("Test Passed: Main player list is correct.");
     }
@@ -73,14 +74,14 @@ function testGetRosterMap() {
   }
 }
 
-function testGetMainRosterPlayers() {
-  Logger.log("Running test: testGetMainRosterPlayers...");
-  const rosterMap = {
+function testGetMainRosterPlayerStrings() {
+  Logger.log("Running test: testGetMainRosterPlayerStrings...");
+  const rosterTypeToPlayerStrings = {
     "Main": ["player1", "player2"],
     "SecondaryReserve": ["player3"]
   };
 
-  const mainPlayers = getMainRosterPlayers(rosterMap);
+  const mainPlayers = getMainRosterPlayerStrings(rosterTypeToPlayerStrings);
 
   if (mainPlayers.length !== 2 || mainPlayers[0] !== "player1" || mainPlayers[1] !== "player2") {
     Logger.log("Test Failed: getMainRosterPlayers did not return the correct players.");
@@ -89,14 +90,14 @@ function testGetMainRosterPlayers() {
   }
 }
 
-function testGetSecondaryReserveRosterPlayers() {
-  Logger.log("Running test: testGetSecondaryReserveRosterPlayers...");
-  const rosterMap = {
+function testGetSecondaryReserveRosterPlayerStrings() {
+  Logger.log("Running test: testGetSecondaryReserveRosterPlayerStrings...");
+  const rosterTypeToPlayerStrings = {
     "Main": ["player1", "player2"],
     "SecondaryReserve": ["player3"]
   };
 
-  const secondaryReservePlayers = getSecondaryReserveRosterPlayers(rosterMap);
+  const secondaryReservePlayers = getSecondaryReserveRosterPlayerStrings(rosterTypeToPlayerStrings);
 
   if (secondaryReservePlayers.length !== 1 || secondaryReservePlayers[0] !== "player3") {
     Logger.log("Test Failed: getSecondaryReserveRosterPlayers did not return the correct players.");
@@ -208,5 +209,48 @@ function testGetWaitlistGroupEmails() {
     Logger.log("Got: " + thursdayEmails);
   } else {
     Logger.log("Test Passed (Thursday): getWaitlistGroupEmails works as expected.");
+  }
+}
+
+function testIsMainRosterPlayerString() {
+  Logger.log("Running test: testIsMainRosterPlayerString...");
+
+  const rosterMap = {
+    "Main": ["player1 <p1@a.com>", "player2 <p2@b.com>"],
+    "SecondaryReserve": ["player3 <p3@c.com>"]
+  };
+
+  // Test case 1: Player is in the main roster
+  let player1 = "player1 <p1@a.com>";
+  if (isMainRosterPlayerString(player1, rosterMap) !== true) {
+    Logger.log("Test Failed: Expected player1 to be a main roster player.");
+  } else {
+    Logger.log("Test Passed: Correctly identified main roster player.");
+  }
+
+  // Test case 2: Player is not in the main roster (is a reserve)
+  let player3 = "player3 <p3@c.com>";
+  if (isMainRosterPlayerString(player3, rosterMap) !== false) {
+    Logger.log("Test Failed: Expected player3 not to be a main roster player.");
+  } else {
+    Logger.log("Test Passed: Correctly identified non-main roster player.");
+  }
+
+  // Test case 3: Player is not in any list
+  let player4 = "player4 <p4@d.com>";
+  if (isMainRosterPlayerString(player4, rosterMap) !== false) {
+    Logger.log("Test Failed: Expected player4 not to be a main roster player.");
+  } else {
+    Logger.log("Test Passed: Correctly identified player not on any list.");
+  }
+
+  // Test case 4: Main player list is empty
+  const emptyRosterMap = {
+    "SecondaryReserve": ["player3 <p3@c.com>"]
+  };
+  if (isMainRosterPlayerString(player1, emptyRosterMap) !== false) {
+    Logger.log("Test Failed: Expected player1 not to be a main roster player with empty main list.");
+  } else {
+    Logger.log("Test Passed: Correctly handled empty main roster list.");
   }
 }

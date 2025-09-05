@@ -360,7 +360,7 @@ function testDeleteAccidentalCopiesOfSpreadsheets() {
   }
 }
 
-function testSignupCountsRangeNameAndDay(rangeName, dayString, playerToGameCount) {
+function testSignupCountsRangeNameAndDay(rangeName, dayString, playerStringToGameCount) {
   const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
 
   const sheets = spreadsheet.getSheets();
@@ -371,18 +371,18 @@ function testSignupCountsRangeNameAndDay(rangeName, dayString, playerToGameCount
       // Logger.log("Ignoring sheet prior to July. Sheet name=" + sheet.getName());
     } else {
       const range = sheet.getRange(rangeName);
-      const players = getPlayerSetFromRange(range);
-      Logger.log("Week=" + sheet.getName() + ", range=" + rangeName + ", playerCount=" + players.size);
-      for (let player of players) {
-        player = normalizePlayer(player);
-        player = getEmailFromPlayer(player);
-        let count = playerToGameCount.get(player);
+      const playerStrings = getPlayerSetFromRange(range);
+      Logger.log("Week=" + sheet.getName() + ", range=" + rangeName + ", playerCount=" + playerStrings.size);
+      for (let playerString of playerStrings) {
+        playerString = normalizePlayerString(playerString);
+        playerString = getEmailFromPlayerString(playerString);
+        let count = playerStringToGameCount.get(playerString);
         //Logger.log("player=" + player + " oldCount=" + count);
         if (count == null) {
           count = 0;
         }
         count = count + 1;
-        playerToGameCount.set(player, count);
+        playerStringToGameCount.set(playerString, count);
         //Logger.log("player=" + player + " newGameCount=" + count);
       }
     }
@@ -414,7 +414,7 @@ function testReplyParsingForType(messages, type) {
   for (var i = 0; i < messages.length; i++) {
     var msg = messages[i];
     var plainBody = msg.getPlainBody();
-    var player = normalizePlayer(msg.getFrom());
+    var player = normalizePlayerString(msg.getFrom());
 
     if (type == "EQUALITY") {
       var trunctatedBody = msg.getBody().toLowerCase().substring(0, 80)
@@ -474,16 +474,16 @@ function testConstants() {
 }
 
 function testGetEmailFromPlayer() {
-  Logger.log(getNameFromPlayer("aaa"));
-  Logger.log(getEmailFromPlayer("aaa"));
-  Logger.log(getNameFromPlayer("aaa@gmail.com"));
-  Logger.log(getEmailFromPlayer("aaa@gmail.com"));
-  Logger.log(getNameFromPlayer("AAA <aaa@gmail.com>"));
-  Logger.log(getEmailFromPlayer("AAA <aaa@gmail.com>"));
-  Logger.log(getNameFromPlayer("AAA <aaa+canned-repsonse@gmail.com>"));
-  Logger.log(getEmailFromPlayer("AAA <aaa+canned-repsonse@gmail.com>"));
-  Logger.log(getNameFromPlayer("AAA <aaa+canned-repsonse@yahoo.com>"));
-  Logger.log(getEmailFromPlayer("AAA <aaa+canned-repsonse@yahoo.com>"));
+  Logger.log(getNameFromPlayerString("aaa"));
+  Logger.log(getEmailFromPlayerString("aaa"));
+  Logger.log(getNameFromPlayerString("aaa@gmail.com"));
+  Logger.log(getEmailFromPlayerString("aaa@gmail.com"));
+  Logger.log(getNameFromPlayerString("AAA <aaa@gmail.com>"));
+  Logger.log(getEmailFromPlayerString("AAA <aaa@gmail.com>"));
+  Logger.log(getNameFromPlayerString("AAA <aaa+canned-repsonse@gmail.com>"));
+  Logger.log(getEmailFromPlayerString("AAA <aaa+canned-repsonse@gmail.com>"));
+  Logger.log(getNameFromPlayerString("AAA <aaa+canned-repsonse@yahoo.com>"));
+  Logger.log(getEmailFromPlayerString("AAA <aaa+canned-repsonse@yahoo.com>"));
 }
 
 function testArray() {

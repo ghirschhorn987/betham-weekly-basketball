@@ -260,63 +260,25 @@ function addWaitlistEmailResponsesToMapsForDayByGroup(dayString, inResponsesMapP
   for (var i = 0; i < messages.length; i++) {
     var msg = messages[i];
     var latestReply = msg.getPlainBody();
-    var player = normalizePlayer(msg.getFrom());
-    var groupType = getPlayerGroupType(dayString, player);
+    var playerString = normalizePlayerString(msg.getFrom());
+    var rosterTypeToPlayerStrings = getRosterTypeToPlayerStrings();
 
     if (isInGameReply(latestReply)) {
-      if (groupType === "PrimaryWaitlist") {
-        addPlayerToMap(inResponsesMapPrimary, player, latestReply);
-      } else if (groupType === "SecondaryWaitlist") {
-        addPlayerToMap(inResponsesMapSecondary, player, latestReply);
+      if (isMainRosterPlayerString(playerString, rosterTypeToPlayerStrings)) {
+        addPlayerStringToMap(inResponsesMapPrimary, playerString, latestReply);
+      } else {
+        addPlayerStringToMap(inResponsesMapSecondary, playerString, latestReply);
       }
-      deletePlayerFromMap(outResponsesMap, player);
+      deletePlayerStringFromMap(outResponsesMap, playerString);
     }
     else if (isOutOfGameReply(latestReply)) {
-      addPlayerToMap(outResponsesMap, player, latestReply);
-      deletePlayerFromMap(inResponsesMapPrimary, player);
-      deletePlayerFromMap(inResponsesMapSecondary, player);
+      addPlayerStringToMap(outResponsesMap, playerString, latestReply);
+      deletePlayerStringFromMap(inResponsesMapPrimary, playerString);
+      deletePlayerStringFromMap(inResponsesMapSecondary, playerString);
     } else {
-      addPlayerToMap(otherResponsesMap, player, latestReply);
+      addPlayerStringToMap(otherResponsesMap, playerString, latestReply);
     }
   }
-}
-
-// Helper to get group type for a player
-function getPlayerGroupType(dayString, player) {
-  // Normalize the input to an email address for comparisons
-  let playerEmail = player;
-  try {
-    // If player is in "Name <email>" form, extract email
-    playerEmail = getEmailFromPlayer(player);
-  } catch (e) {
-    // If helper not available or fails, fall back to input
-    playerEmail = (player || "").toString().trim();
-  }
-
-  // 1) Check the central roster spreadsheet's ALL_EMAIL_RANGE_NAME (email, RosterType)
-  try {
-    const rosterSs = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
-    const allRange = rosterSs.getRangeByName(ALL_EMAIL_RANGE_NAME);
-    if (allRange) {
-      const rows = allRange.getValues();
-      for (let r = 0; r < rows.length; r++) {
-        const email = rows[r][0] ? rows[r][0].toString().trim() : "";
-        const rosterType = rows[r][1] ? rows[r][1].toString().trim() : "";
-        if (email !== "" && email === playerEmail) {
-          if (rosterType === PLAYER_TYPE_MAIN) {
-            return "PrimaryWaitlist";
-          }
-          if (rosterType === PLAYER_TYPE_SECONDARY_RESERVE) {
-            return "SecondaryWaitlist";
-          }
-        }
-      }
-    }
-  } catch (e) {
-    Logger.log("Error reading ALL_EMAIL_RANGE_NAME from roster spreadsheet: " + e);
-  }
-
-  return null;
 }
 
 //========================================
@@ -352,16 +314,16 @@ function addWaitlistEmailResponsesToMapsForThread(thread, inResponsesMap, outRes
   for (var i = 0; i < messages.length; i++) {
     var msg = messages[i];
     var latestReply = msg.getPlainBody();
-    var player = normalizePlayer(msg.getFrom());
+    var playerString = normalizePlayerString(msg.getFrom());
     if (isInGameReply(latestReply)) {
-      addPlayerToMap(inResponsesMap, player, latestReply);
-      deletePlayerFromMap(outResponsesMap, player);
+      addPlayerStringToMap(inResponsesMap, playerString, latestReply);
+      deletePlayerStringFromMap(outResponsesMap, playerString);
     }
     else if (isOutOfGameReply(latestReply)) {
-      addPlayerToMap(outResponsesMap, player, latestReply);
-      deletePlayerFromMap(inResponsesMap, player);
+      addPlayerStringToMap(outResponsesMap, playerString, latestReply);
+      deletePlayerStringFromMap(inResponsesMap, playerString);
     } else {
-      addPlayerToMap(otherResponsesMap, player, latestReply);
+      addPlayerStringToMap(otherResponsesMap, playerString, latestReply);
     }
   }
 }
