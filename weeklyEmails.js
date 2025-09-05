@@ -473,25 +473,6 @@ function getSecondaryWaitlistEmails(dayString) {
   return Array.from(emailsSet);
 }
 
-// Test helper: return resolved primary/secondary waitlist lists (no emails sent)
-function getResolvedWaitlistLists() {
-  const primary = getPrimaryWaitlistEmails("");
-  const secondary = getSecondaryWaitlistEmails("");
-  return { primary: primary, secondary: secondary };
-}
-
-// Test helper: log resolved primary and secondary waitlist lists for inspection
-function logResolvedWaitlistLists() {
-  const lists = getResolvedWaitlistLists();
-  Logger.log('--- Resolved Waitlist Lists ---');
-  Logger.log('Primary count: ' + lists.primary.length);
-  Logger.log('Primary emails:\n' + lists.primary.join('\n'));
-  Logger.log('Secondary count: ' + lists.secondary.length);
-  Logger.log('Secondary emails:\n' + lists.secondary.join('\n'));
-  Logger.log('--- End Resolved Waitlist Lists ---');
-  return lists;
-}
-
 // Reads emails for a group either from an external spreadsheet (if constant set)
 // or from the RSVP spreadsheet Players tab (existing behavior).
 function getPlayerEmailsFromExternalOrPlayersTab(dayString, groupType) {

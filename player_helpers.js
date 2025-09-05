@@ -210,3 +210,6 @@ function getMainRosterPlayers(rosterMap) {
   return rosterMap[PLAYER_TYPE_MAIN] || [];
 }
 
+function getSecondaryReserveRosterPlayers(rosterMap) {
+  return rosterMap[PLAYER_TYPE_SECONDARY_RESERVE] || [];
+}
