@@ -392,6 +392,18 @@ function getRosterGroupEmails(dayString) {
   }
 }
 
+function getWaitlistGroupEmails(dayString) {
+  switch (dayString) {
+    case "sunday":
+      return EMAIL_GROUP_RESERVES + ", " + EMAIL_GROUP_ROSTER_NON_SUNDAY + ", " + EMAIL_GROUP_ADMINS;
+    case "tuesday":
+      return EMAIL_GROUP_RESERVES + ", " + EMAIL_GROUP_ROSTER_NON_TUESDAY + ", " + EMAIL_GROUP_ADMINS;
+    case "thursday":
+      return EMAIL_GROUP_RESERVES + ", " + EMAIL_GROUP_ROSTER_NON_THURSDAY + ", " + EMAIL_GROUP_ADMINS;
+    default: throw new Error("Unknown day: " + dayString);
+  }
+}
+
 // Helper to get player emails by group type from spreadsheet
 function getPlayerEmailsByGroup(dayString, groupType) {
   const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
@@ -406,14 +418,6 @@ function getPlayerEmailsByGroup(dayString, groupType) {
     }
   }
   return emails;
-}
-
-// Update getWaitlistGroupEmails to include both waitlist groups
-function getWaitlistGroupEmails(dayString) {
-  // Prefer building waitlist groups from the central roster spreadsheet.
-  const primary = getPrimaryWaitlistEmails(dayString);
-  const secondary = getSecondaryWaitlistEmails(dayString);
-  return [...primary, ...secondary, EMAIL_GROUP_ADMINS].join(", ");
 }
 
 // Build primary waitlist emails from ROSTER_SPREADSHEET_ID.
