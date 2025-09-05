@@ -13,8 +13,6 @@ function sendEmail(emailAddressesAsString, subject, body, htmlBody) {
   Logger.log("Sending email to: " + emailAddressesAsString);
   Logger.log("Email subject: " + subject);
 
-  GmailApp.sendEmail(emailAddressesAsString, subject, body, { htmlBody: htmlBody });
-
   if (USE_OVERRIDE_VALUES && OVERRIDE_LOG_EMAIL_INSTEAD_OF_SENDING) {
     Logger.log("Logging email instead of sending it.");
     Logger.log("Body: " + htmlBody);

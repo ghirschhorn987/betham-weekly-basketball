@@ -36,7 +36,7 @@ function getRsvpSpreadsheetId(dayString) {
   }
 }
 
-function getRsvpSpreadsheetRangeForDay(dayString, rangeSpec) {
+function getRsvpSpreadsheetRangeForDayString(dayString, rangeSpec) {
   const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
   const nextDate = getDateForNextOccurrenceOfDay(dayString);
   const tab = getRsvpTabForDate(spreadsheet, nextDate, dayString);
@@ -72,7 +72,7 @@ function getMonthNumberFromRsvpTabName(tabName) {
 
 function getOpenSpotCount(dayString) {
   var openSpotCount = 0;
-  const range = getRsvpSpreadsheetRangeForDay(dayString, RSVP_CELLS_IN_GAME_RANGE);
+  const range = getRsvpSpreadsheetRangeForDayString(dayString, RSVP_CELLS_IN_GAME_RANGE);
   for (row = 1; row <= range.getHeight(); row++) {
     const cell = range.getCell(row, 1);
     if (cell.isBlank()) {
@@ -83,7 +83,7 @@ function getOpenSpotCount(dayString) {
 }
 
 function getPlayerSetFromRsvpWaitlistRange(dayString) {
-  const waitlistRange = getRsvpSpreadsheetRangeForDay(dayString, RSVP_CELLS_WAITLIST_RANGE);
+  const waitlistRange = getRsvpSpreadsheetRangeForDayString(dayString, RSVP_CELLS_WAITLIST_RANGE);
   return getPlayerSetFromRange(waitlistRange);
 }
 

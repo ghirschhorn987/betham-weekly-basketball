@@ -192,7 +192,7 @@ function getRosterTypeToPlayerStrings() {
 
   for (let i = 0; i < values.length; i++) {
     const row = values[i];
-    const playerString = row[0];
+    const playerString = normalizePlayerString(row[0]);
     const rosterType = row[1];
 
     if (playerString && rosterType && rosterType.trim() !== "") {
@@ -216,5 +216,6 @@ function getSecondaryReserveRosterPlayerStrings(rosterMap) {
 
 function isMainRosterPlayerString(playerString, rosterTypeToPlayerStrings) {
   const mainPlayers = rosterTypeToPlayerStrings[PLAYER_TYPE_MAIN] || [];
-  return mainPlayers.includes(playerString);
+  const inputEmail = getEmailFromPlayerString(playerString).toLowerCase();
+  return mainPlayers.some(mainPlayer => getEmailFromPlayerString(mainPlayer).toLowerCase() === inputEmail);
 }

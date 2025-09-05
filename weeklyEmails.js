@@ -9,9 +9,9 @@ function runOnce_MANUALLY() {
 
   // for (x=0; x<100; x++) {
   // const lastStepThatWasRunRange = getLastStepThatWasRunRange();
-  createAndSendWaitlistEmailForDay("thursday");
+  // createAndSendWaitlistEmailForDay("thursday");
   //addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["WAITLIST EMAIL"], false);
-  //replyInitialToWaitlistEmailResponsesForDay("thursday");
+  replyInitialToWaitlistEmailResponsesForDay("thursday");
   //addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["INITIAL WAITLIST REPLY"], false);
   //replyFinalToWaitlistEmailResponsesForDay("thursday");
   // }
@@ -239,7 +239,7 @@ function replyInitialToWaitlistEmailResponsesForDay(dayString) {
   Logger.log("Open spots: " + openSpotCount);
 
   // Add primary first, then secondary
-  const range = getRsvpSpreadsheetRangeForDay(dayString, RSVP_CELLS_WAITLIST_RANGE);
+  const range = getRsvpSpreadsheetRangeForDayString(dayString, RSVP_CELLS_WAITLIST_RANGE);
   const playersAddedArray = addValuesArrayToSpreadsheetRange(
     range,
     [...Array.from(inResponsesMapPrimary.keys()), ...Array.from(inResponsesMapSecondary.keys())],
@@ -255,27 +255,47 @@ function replyInitialToWaitlistEmailResponsesForDay(dayString) {
 
 // Helper to classify responses by group
 function addWaitlistEmailResponsesToMapsForDayByGroup(dayString, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap) {
+  Logger.log("addWaitlistEmailResponsesToMapsForDayByGroup(dayString). dayString=" + dayString);
+
   const thread = getWaitlistEmailThreadForDayString(dayString);
   const messages = thread.getMessages();
   for (var i = 0; i < messages.length; i++) {
     var msg = messages[i];
+
+    // getBody() gets the HTML body, which makes it hard to find what the reply started with.
+    // So we use getPlainBody() to get just the text.
+    // But this may have its own issues: I had a case where this string was not starting with "Out" on ghirschhorn987 replies
+    // to group but it reported it did. Not sure where it got it from -- possibly/probably from an earlier reply in the thread
+    // and it got confused.
     var latestReply = msg.getPlainBody();
+
     var playerString = normalizePlayerString(msg.getFrom());
     var rosterTypeToPlayerStrings = getRosterTypeToPlayerStrings();
 
+    Logger.log("WaitlistEmailReply. msg.getFrom()=" + msg.getFrom() + ", playerString=" + playerString);
+    Logger.log("msg=" + msg + ", msg.getPlainBody()=" + msg.getPlainBody().substring(0, 100) + "... , msg.getBody()=" + msg.getBody().substring(0, 100) + "...");
+
+    // if (playerString.includes("ghirschhorn987")) {
+    //   Logger.log("Found ghirschhorn987. msg=" + msg + ", msg.getPlainBody()=" + msg.getPlainBody().substring(0, 100) + "... , msg.getBody()=" + msg.getBody().substring(0, 100) + "...");
+    // }
+
     if (isInGameReply(latestReply)) {
       if (isMainRosterPlayerString(playerString, rosterTypeToPlayerStrings)) {
+        Logger.log("IN reply -- primary wait list.");
         addPlayerStringToMap(inResponsesMapPrimary, playerString, latestReply);
       } else {
+        Logger.log("IN reply -- secondary wait list.");
         addPlayerStringToMap(inResponsesMapSecondary, playerString, latestReply);
       }
       deletePlayerStringFromMap(outResponsesMap, playerString);
     }
     else if (isOutOfGameReply(latestReply)) {
+      Logger.log("OUT reply.");
       addPlayerStringToMap(outResponsesMap, playerString, latestReply);
       deletePlayerStringFromMap(inResponsesMapPrimary, playerString);
       deletePlayerStringFromMap(inResponsesMapSecondary, playerString);
     } else {
+      Logger.log("OTHER reply.");
       addPlayerStringToMap(otherResponsesMap, playerString, latestReply);
     }
   }
@@ -303,37 +323,18 @@ function copyTemplateRsvpTabToRsvpSpreadsheetTab(templateRsvpTab, rsvpSpreadshee
   return newTab;
 }
 
-
-function addWaitlistEmailResponsesToMapsForDay(dayString, inResponsesMap, outResponsesMap, otherResponsesMap) {
-  const thread = getWaitlistEmailThreadForDayString(dayString);
-  addWaitlistEmailResponsesToMapsForThread(thread, inResponsesMap, outResponsesMap, otherResponsesMap);
-}
-
-function addWaitlistEmailResponsesToMapsForThread(thread, inResponsesMap, outResponsesMap, otherResponsesMap) {
-  const messages = thread.getMessages();
-  for (var i = 0; i < messages.length; i++) {
-    var msg = messages[i];
-    var latestReply = msg.getPlainBody();
-    var playerString = normalizePlayerString(msg.getFrom());
-    if (isInGameReply(latestReply)) {
-      addPlayerStringToMap(inResponsesMap, playerString, latestReply);
-      deletePlayerStringFromMap(outResponsesMap, playerString);
-    }
-    else if (isOutOfGameReply(latestReply)) {
-      addPlayerStringToMap(outResponsesMap, playerString, latestReply);
-      deletePlayerStringFromMap(inResponsesMap, playerString);
-    } else {
-      addPlayerStringToMap(otherResponsesMap, playerString, latestReply);
-    }
-  }
-}
-
 function isInGameReply(latestReply) {
-  return latestReply.trimStart().toLowerCase().startsWith(WAITLIST_IN_GAME_REPLY_LOWERCASE);
+  var normalizedMessage = latestReply.trimStart().toLowerCase();
+  return normalizedMessage.startsWith(WAITLIST_IN_GAME_REPLY_LOWERCASE);
 }
 
 function isOutOfGameReply(latestReply) {
-  return latestReply.trimStart().toLowerCase().startsWith(WAITLIST_OUT_OF_GAME_REPLY_LOWERCASE);
+  var normalizedMessage = latestReply.trimStart().toLowerCase();
+  var isOutOfGameReply = normalizedMessage.startsWith(WAITLIST_OUT_OF_GAME_REPLY_LOWERCASE);
+  if (isOutOfGameReply) {
+    Logger.log("outOfGameReply=" + isOutOfGameReply + ", latestReply= " + latestReply + ", normalizedMessage=" + normalizedMessage);
+  }
+  return isOutOfGameReply;
 }
 
 function getGameTimeString(dayString) {

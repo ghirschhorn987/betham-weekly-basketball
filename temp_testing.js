@@ -129,23 +129,6 @@ function zzz_deleteSelectedSheets() {
   // }
 }
 
-function test() {
-  //USE_OVERRIDE_VALUES = true;
-  USE_OVERRIDE_VALUES = false;
-
-  var inResponsesMap = new Map();
-  const outResponsesMap = new Map();
-  const otherResponsesMap = new Map();
-
-  var dayString = "sunday";
-  addWaitlistEmailResponsesToMapsForDay(dayString, inResponsesMap, outResponsesMap, otherResponsesMap);
-
-  Logger.log("==========================\r\nRESPONSE ORDER:\r\n" + arrayAsNumberedNewLineSeparatedString(Array.from(inResponsesMap.keys())) + "\r\n==========================");
-  // for (i = 0; i < 100; i++) {
-  //   testShuffleReplys(dayString);
-  // }
-}
-
 function testDates() {
   var date = new Date(2023, 00, 07);
   Logger.log(getWaitlistEmailSubjectForDate(getDateAsString(date)));
@@ -154,36 +137,6 @@ function testDates() {
   Logger.log(date);
   Logger.log(getWaitlistEmailSubjectForDate(getDateAsString(date)));
 
-}
-
-function testGetWaitlistResponsesForDateRange() {
-  // for all days {
-  //   var inResponsesMap = new Map();
-  //   const outResponsesMap = new Map();
-  //   const otherResponsesMap = new Map();
-  //   addWaitlistEmailResponsesToMapsForDay(dayString, inResponsesMap, outResponsesMap, otherResponsesMap);
-
-  // //Logger.log("\r\nInitial IN:\r\n" + arrayAsNewLineSeparatedString(Array.from(inResponsesMap.keys())));
-  // //Logger.log("\r\nInitial OUT:\r\n" + arrayAsNewLineSeparatedString(Array.from(outResponsesMap.keys())));
-  // //Logger.log("\r\nInitial OTHER:\r\n" + arrayAsNewLineSeparatedString(Array.from(otherResponsesMap.keys())));
-
-  // Logger.log("==========================\r\nRESPONSE ORDER:\r\n" + arrayAsNumberedNewLineSeparatedString(Array.from(inResponsesMap.keys())) + "\r\n==========================");
-  // }
-}
-
-function testShuffleReplys(dayString) {
-  var inResponsesMap = new Map();
-  const outResponsesMap = new Map();
-  const otherResponsesMap = new Map();
-
-  addWaitlistEmailResponsesToMapsForDay(dayString, inResponsesMap, outResponsesMap, otherResponsesMap);
-  inResponsesMap = shuffleMap(inResponsesMap);
-
-  //Logger.log("\r\nInitial IN:\r\n" + arrayAsNewLineSeparatedString(Array.from(inResponsesMap.keys())));
-  //Logger.log("\r\nInitial OUT:\r\n" + arrayAsNewLineSeparatedString(Array.from(outResponsesMap.keys())));
-  //Logger.log("\r\nInitial OTHER:\r\n" + arrayAsNewLineSeparatedString(Array.from(otherResponsesMap.keys())));
-
-  Logger.log("==========================\r\nRANDOMIZED ORDER:\r\n" + arrayAsNumberedNewLineSeparatedString(Array.from(inResponsesMap.keys())) + "\r\n==========================");
 }
 
 function testNoGames() {

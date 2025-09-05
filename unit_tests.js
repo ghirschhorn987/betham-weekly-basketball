@@ -220,12 +220,12 @@ function testIsMainRosterPlayerString() {
     "SecondaryReserve": ["player3 <p3@c.com>"]
   };
 
-  // Test case 1: Player is in the main roster
-  let player1 = "player1 <p1@a.com>";
+  // Test case 1: Player is in the main roster (with different case)
+  let player1 = "PLAYER1 <p1@a.com>";
   if (isMainRosterPlayerString(player1, rosterMap) !== true) {
     Logger.log("Test Failed: Expected player1 to be a main roster player.");
   } else {
-    Logger.log("Test Passed: Correctly identified main roster player.");
+    Logger.log("Test Passed: Correctly identified main roster player (case-insensitive).");
   }
 
   // Test case 2: Player is not in the main roster (is a reserve)
@@ -252,5 +252,13 @@ function testIsMainRosterPlayerString() {
     Logger.log("Test Failed: Expected player1 not to be a main roster player with empty main list.");
   } else {
     Logger.log("Test Passed: Correctly handled empty main roster list.");
+  }
+
+  // Test case 5: Player has same email but different name
+  let player1_alt_name = "DIFFERENT NAME <p1@a.com>";
+  if (isMainRosterPlayerString(player1_alt_name, rosterMap) !== true) {
+    Logger.log("Test Failed: Expected player with different name but same email to be a main roster player.");
+  } else {
+    Logger.log("Test Passed: Correctly identified main roster player by email only.");
   }
 }

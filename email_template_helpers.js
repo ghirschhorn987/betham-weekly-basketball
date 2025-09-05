@@ -28,7 +28,6 @@ function getWaitlistEmailSubjectForDay(dayString) {
   return subject;
 }
 
-
 function getWaitlistEmailSubjectForDate(date) {
   var subject;
   if (USE_OVERRIDE_VALUES) {
