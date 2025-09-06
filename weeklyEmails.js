@@ -3,15 +3,15 @@
 //========================================
 function runOnce_MANUALLY() {
   // const dayString = "monday";
-  //const date = getDateForNextOccurrenceOfDay(dayString);
-  // const date = new Date("2025-06-12");
+  // const date = getDateForNextOccurrenceOfDay(dayString);
+  const gameDate = new Date("2025-08-28 00:00:00");
   // createAndSendRosterEmailForDateAndDay(date, dayString);
 
   // for (x=0; x<100; x++) {
   // const lastStepThatWasRunRange = getLastStepThatWasRunRange();
   // createAndSendWaitlistEmailForDay("thursday");
   //addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["WAITLIST EMAIL"], false);
-  replyInitialToWaitlistEmailResponsesForDay("thursday");
+  replyInitialToWaitlistEmailResponsesForGameDate(gameDate);
   //addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["INITIAL WAITLIST REPLY"], false);
   //replyFinalToWaitlistEmailResponsesForDay("thursday");
   // }
@@ -243,7 +243,7 @@ function replyInitialToWaitlistEmailResponsesForGameDate(gameDate) {
   Logger.log("Open spots for " + getDateAsString(gameDate) + ": " + openSpotCount);
 
   // Add primary first, then secondary
-  const range = getRsvpSpreadsheetRangeForDayString(gameDayString, RSVP_CELLS_WAITLIST_RANGE);
+  const range = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_WAITLIST_RANGE);
   const playersAddedArray = addValuesArrayToSpreadsheetRange(
     range,
     [...Array.from(inResponsesMapPrimary.keys()), ...Array.from(inResponsesMapSecondary.keys())],

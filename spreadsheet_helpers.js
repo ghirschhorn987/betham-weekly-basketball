@@ -36,12 +36,12 @@ function getRsvpSpreadsheetId(dayString) {
   }
 }
 
-function getRsvpSpreadsheetRangeForDayString(dayString, rangeSpec) {
+function getRsvpSpreadsheetRangeForGameDate(gameDate, rangeSpec) {
+  const dayString = getDateAsDayString(gameDate);
   const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
-  const nextDate = getDateForNextOccurrenceOfDay(dayString);
-  const tab = getRsvpTabForDate(spreadsheet, nextDate, dayString);
+  const tab = getRsvpTabForDate(spreadsheet, gameDate, dayString);
   if (tab == null) {
-    throw new Error("No tab found. spreadsheet=" + spreadsheet.getName() + ", nextDate=" + nextDate + ", day=" + dayString + ", tabName= " + getRsvpTabNameForDate(nextDate, dayString));
+    throw new Error("No tab found. spreadsheet=" + spreadsheet.getName() + ", gameDate=" + gameDate + ", day=" + dayString + ", tabName= " + getRsvpTabNameForDate(gameDate, dayString));
   }
   return tab.getRange(rangeSpec);
 }
@@ -70,9 +70,8 @@ function getMonthNumberFromRsvpTabName(tabName) {
   return new Date(parts[2]).getMonth();
 }
 
-function getOpenSpotCountForDate(date) {
-  const dayString = getDateAsDayString(date);
-  const range = getRsvpSpreadsheetRangeForDayString(dayString, RSVP_CELLS_IN_GAME_RANGE);
+function getOpenSpotCountForDate(gameDate) {
+  const range = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_IN_GAME_RANGE);
   let openSpotCount = 0;
   for (let row = 1; row <= range.getHeight(); row++) {
     const cell = range.getCell(row, 1);
@@ -83,8 +82,8 @@ function getOpenSpotCountForDate(date) {
   return openSpotCount;
 }
 
-function getPlayerSetFromRsvpWaitlistRange(dayString) {
-  const waitlistRange = getRsvpSpreadsheetRangeForDayString(dayString, RSVP_CELLS_WAITLIST_RANGE);
+function getPlayerSetFromRsvpWaitlistRangeForGameDate(gameDate) {
+  const waitlistRange = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_WAITLIST_RANGE);
   return getPlayerSetFromRange(waitlistRange);
 }
 
