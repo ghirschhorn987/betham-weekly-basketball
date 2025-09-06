@@ -82,11 +82,6 @@ function getOpenSpotCountForDate(gameDate) {
   return openSpotCount;
 }
 
-function getPlayerSetFromRsvpWaitlistRangeForGameDate(gameDate) {
-  const waitlistRange = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_WAITLIST_RANGE);
-  return getPlayerSetFromRange(waitlistRange);
-}
-
 function getPlayerSetFromRange(range) {
   var playerSet = new Set();
   for (row = 1; row <= range.getHeight(); row++) {
