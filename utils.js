@@ -200,18 +200,6 @@ function decodeHtml(input) {
   return input;
 }
 
-function getTextFromHtml(html) {
-  return getTextFromXmlNode(Xml.parse(html, true).getElement());
-}
-
-function getTextFromXmlNode(xmlNode) {
-  switch (xmlNode.toString()) {
-    case 'XmlText': return xmlNode.toXmlString();
-    case 'XmlElement': return xmlNode.getNodes().map(getTextFromNode).join('');
-    default: return '';
-  }
-}
-
 //========================================
 // Generic utility functions - dates
 //========================================

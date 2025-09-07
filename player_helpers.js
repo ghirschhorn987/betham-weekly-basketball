@@ -125,21 +125,21 @@ function logEmailAddressesAsCommaSeparatedList() {
 function logEmailAddressesAsCommaSeparatedListForTypeAndDay(listType, dayString) {
   Logger.log("listType=" + listType + ", day=" + dayString);
 
-  const spreadsheet = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
-
+  const rosterSpreadsheet = getRosterSpreadsheet();
+  
   var allPlayers = new Set(
-    getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(ALL_EMAIL_RANGE_NAME)));
+    getSpreadsheetRangeValuesAsArray(rosterSpreadsheet.getRangeByName(ALL_EMAIL_RANGE_NAME)));
   allPlayers = removeDuplicatePlayersFromSet(allPlayers);
 
   if (dayString != undefined) {
-    var requestedDayPlayers = new Set(getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(getRosterEmailRangeName(dayString))));
+    var requestedDayPlayers = new Set(getSpreadsheetRangeValuesAsArray(rosterSpreadsheet.getRangeByName(getRosterEmailRangeName(dayString))));
   }
   var tuesdayPlayers = new Set(
-    getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(getRosterEmailRangeName("tuesday"))));
+    getSpreadsheetRangeValuesAsArray(rosterSpreadsheet.getRangeByName(getRosterEmailRangeName("tuesday"))));
   var thursdayPlayers = new Set(
-    getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(getRosterEmailRangeName("thursday"))));
+    getSpreadsheetRangeValuesAsArray(rosterSpreadsheet.getRangeByName(getRosterEmailRangeName("thursday"))));
   var sundayPlayers = new Set(
-    getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(getRosterEmailRangeName("sunday"))));
+    getSpreadsheetRangeValuesAsArray(rosterSpreadsheet.getRangeByName(getRosterEmailRangeName("sunday"))));
   var rosterPlayers = new Set([...tuesdayPlayers, ...thursdayPlayers, ...sundayPlayers]);
 
   Logger.log("allPlayers.size=" + allPlayers.size);
@@ -184,7 +184,7 @@ function logEmailAddressesAsCommaSeparatedListForTypeAndDay(listType, dayString)
 }
 
 function getRosterTypeToPlayerStrings() {
-  const rosterSheet = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
+  const rosterSheet = getRosterSpreadsheet();
   const range = rosterSheet.getRangeByName(ALL_EMAIL_AND_ROSTER_TYPES_RANGE_NAME);
   const values = range.getValues();
 

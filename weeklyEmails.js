@@ -2,41 +2,12 @@
 // Main functions
 //========================================
 function runOnce_MANUALLY() {
-  // const dayString = "monday";
-  // const date = getDateForNextOccurrenceOfDay(dayString);
   const gameDate = new Date("2025-08-28 00:00:00");
-  // createAndSendRosterEmailForDateAndDay(date, dayString);
-
-  // for (x=0; x<100; x++) {
-  // const lastStepThatWasRunRange = getLastStepThatWasRunRange();
-  // createAndSendWaitlistEmailForDay("thursday");
-  //addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["WAITLIST EMAIL"], false);
-  replyInitialToWaitlistEmailResponsesForGameDate(gameDate);
-  //addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["INITIAL WAITLIST REPLY"], false);
-  //replyFinalToWaitlistEmailResponsesForDay("thursday");
-  // }
-
-  // const currentDate = new Date("2023-07-12");
-  // addRsvpTabForDate(currentDate);
-  //prepareRsvpSpreadsheetForDate(new Date("2025-06-01 00:00:00"));
-
-  //const currentDate = new Date();
-  // const currentDate = new Date("2025-06-29");
-
-  // const currentDayOfWeek = currentDate.getDay();
-  // Logger.log("currentDate=" + currentDate);
-  // const rosterDayString = getGameDayStringOfRosterEmailsToSendOnDate(currentDate);
-  // Logger.log("rosterDayString=" + rosterDayString);
-  // var rosterDate;
-  // if (rosterDayString != "") {
-  //   rosterDate = getDateForNextOccurrenceOfDay(rosterDayString);
-  // }
-  // Logger.log("rosterDate=" + rosterDate);
-  // const rosterDay = getDateAsDayString(rosterDate);
-  // Logger.log("rosterDay=" + rosterDay);
-  // const currentDay = getDateAsDayString(currentDate);
-  // Logger.log("currentDay=" + currentDay);
-
+  prepareRsvpSpreadsheetForDate(gameDate);
+  // createAndSendRosterEmailForDate(gameDate);
+  // createAndSendWaitlistEmailForGameDate(gameDate);
+  // replyInitialToWaitlistEmailResponsesForGameDate(gameDate);
+  // replyFinalToWaitlistEmailResponsesForDay(waitlistDayString);
 }
 
 function runEveryMinute() {
@@ -76,7 +47,6 @@ function runEveryMinute() {
   } else if (currentHourOfDay >= 6 && currentHourOfDay <= 7) {
     // Between 6am and 7:59am: crete rsvp spreadsheet if not created
     if (gameDayString != "" && lastStepThatWasRun != "CREATE RSVP SPREADSHEET") {
-      //prepareRsvpSpreadsheetForDay(rosterDayString);
       prepareRsvpSpreadsheetForDate(gameDate);
       addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["CREATE RSVP SPREADSHEET"], false);
     }
@@ -117,39 +87,6 @@ function runEveryMinute() {
 // High-level functions
 //========================================
 
-function prepareRsvpSpreadsheetForDay(dayString) {
-  Logger.log("Preparing RSVP spreadsheet for day: " + dayString);
-
-  const previousDate = getDateForPreviousOccurrenceOfDayString(dayString);
-  const nextDate = getDateForNextOccurrenceOfDay(dayString);
-  const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
-
-  Logger.log("previousDate=" + previousDate + ", next=" + nextDate);
-
-  // Duplicate previous sheet and hide it. Set name of new sheet.
-  const oldTab = getRsvpTabForDate(spreadsheet, previousDate, dayString);
-  oldTab.activate();
-  const newTab = spreadsheet.duplicateActiveSheet();
-  newTab.setName(getRsvpTabNameForDate(nextDate, dayString));
-  oldTab.hideSheet();
-
-  // Set date in new tab
-  newTab.showSheet();
-  spreadsheet.setActiveSheet(newTab);
-  newTab.getRange("A7").getCell(1, 1).setValue(getRsvpTabNameForDate(nextDate, dayString));
-
-  // Clear RSVPs
-  newTab.getRange(RSVP_CELLS_RANGE).clearContent();
-
-  // Add RSVP for Gary
-  if (!isNoGameOnDate(nextDate) && AUTOMATICALLY_RSVP_FOR_GHIRSCHHORN) {
-    newTab.getRange(RSVP_CELLS_IN_GAME_RANGE).getCell(1, 1).setValue(GHIRSCHHORN_NAME);
-    newTab.getRange(RSVP_CELLS_IN_GAME_RANGE).getCell(1, 2).setValue(GHIRSCHHORN_EMAIL);
-  }
-
-  Logger.log("Finished preparing RSVP spreadsheet for day: " + dayString);
-}
-
 function prepareRsvpSpreadsheetForDate(date) {
   addRsvpTabForDate(date);
   const dayString = getDateAsDayString(date);
@@ -163,7 +100,7 @@ function addRsvpTabForDate(date) {
 
   // Create new sheet 
   const templateRsvpTab = getRsvpTabFromTemplateSpreadsheet(date);
-  const rsvpSpreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
+  const rsvpSpreadsheet = getRsvpSpreadsheet(dayString);
   const newRsvpTab = copyTemplateRsvpTabToRsvpSpreadsheetTab(templateRsvpTab, rsvpSpreadsheet);
 
   newRsvpTab.setName(getRsvpTabNameForDate(date, dayString));
@@ -185,7 +122,7 @@ function addRsvpTabForDate(date) {
 function hideRsvpTabForDate(date) {
   Logger.log("Hiding RSVP Table for date: " + date);
   const dayString = getDateAsDayString(date);
-  const rsvpSpreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
+  const rsvpSpreadsheet = getRsvpSpreadsheet(dayString);
   const oldTab = getRsvpTabForDate(rsvpSpreadsheet, date, dayString);
   Logger.log("Hiding oldTab: " + oldTab);
   oldTab.hideSheet();
@@ -370,137 +307,6 @@ function getWaitlistGroupEmails(dayString) {
       return EMAIL_GROUP_RESERVES + ", " + EMAIL_GROUP_ROSTER_NON_THURSDAY + ", " + EMAIL_GROUP_ADMINS;
     default: throw new Error("Unknown day: " + dayString);
   }
-}
-
-// Helper to get player emails by group type from spreadsheet
-function getPlayerEmailsByGroup(dayString, groupType) {
-  const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
-  const tab = spreadsheet.getSheetByName("Players"); // Adjust tab name if needed
-  const data = tab.getDataRange().getValues();
-  const groupColIdx = data[0].indexOf("Group"); // Assumes header row has "Group"
-  const emailColIdx = data[0].indexOf("Email");
-  let emails = [];
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][groupColIdx] === groupType) {
-      emails.push(data[i][emailColIdx]);
-    }
-  }
-  return emails;
-}
-
-// Build primary waitlist emails from ROSTER_SPREADSHEET_ID.
-// Primary = any email in ALL_EMAIL_RANGE_NAME with RosterType == PLAYER_TYPE_MAIN
-function getPrimaryWaitlistEmails(dayString) {
-  const emailsSet = new Set();
-  try {
-    const rosterSs = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
-    // Read ALL_EMAIL_RANGE_NAME (expected two columns: email, RosterType)
-    try {
-      const allRange = rosterSs.getRangeByName(ALL_EMAIL_RANGE_NAME);
-      if (allRange) {
-        const rows = allRange.getDisplayValues();
-        for (let r = 0; r < rows.length; r++) {
-          const email = rows[r][0] ? rows[r][0].toString().trim() : "";
-          const rosterType = rows[r][1] ? rows[r][1].toString().trim() : "";
-          if (email !== "" && rosterType === PLAYER_TYPE_MAIN) {
-            emailsSet.add(email);
-          }
-        }
-      }
-    } catch (e) {
-      Logger.log("Warning: could not read ALL_EMAIL_RANGE_NAME: " + e);
-    }
-  } catch (e) {
-    Logger.log("Error opening roster spreadsheet for primary list: " + e);
-  }
-
-  return Array.from(emailsSet);
-}
-
-// Build secondary waitlist emails from ROSTER_SPREADSHEET_ID.
-// Secondary = any email in ALL_EMAIL_RANGE_NAME with RosterType == 'SecondaryReserve'
-function getSecondaryWaitlistEmails(dayString) {
-  const emailsSet = new Set();
-  try {
-    const rosterSs = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
-    try {
-      const allRange = rosterSs.getRangeByName(ALL_EMAIL_RANGE_NAME);
-      if (allRange) {
-        const rows = allRange.getDisplayValues();
-        for (let r = 0; r < rows.length; r++) {
-          const email = rows[r][0] ? rows[r][0].toString().trim() : "";
-          const rosterType = rows[r][1] ? rows[r][1].toString().trim() : "";
-          if (email !== "" && rosterType.toLowerCase() === "secondaryreserve") {
-            emailsSet.add(email);
-          }
-        }
-      }
-    } catch (e) {
-      Logger.log("Warning: could not read ALL_EMAIL_RANGE_NAME for secondary list: " + e);
-    }
-  } catch (e) {
-    Logger.log("Error opening roster spreadsheet for secondary list: " + e);
-  }
-
-  return Array.from(emailsSet);
-}
-
-// Reads emails for a group either from an external spreadsheet (if constant set)
-// or from the RSVP spreadsheet Players tab (existing behavior).
-function getPlayerEmailsFromExternalOrPlayersTab(dayString, groupType) {
-  // Map groupType to optional external spreadsheet constants
-  var externalSpreadsheetId = null;
-  if (groupType === "PrimaryWaitlist") {
-    externalSpreadsheetId = PRIMARY_WAITLIST_SPREADSHEET_ID;
-  } else if (groupType === "SecondaryWaitlist") {
-    externalSpreadsheetId = SECONDARY_WAITLIST_SPREADSHEET_ID;
-  }
-
-  // If an external spreadsheet ID is configured, try to read column A values
-  if (externalSpreadsheetId && externalSpreadsheetId !== "") {
-    try {
-      const ss = SpreadsheetApp.openById(externalSpreadsheetId);
-      const sheet = ss.getSheets()[0];
-      const values = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues();
-      const emails = [];
-      for (let i = 0; i < values.length; i++) {
-        const v = values[i][0];
-        if (v && v.toString().trim() !== "") {
-          emails.push(v.toString().trim());
-        }
-      }
-      return emails;
-    } catch (e) {
-      Logger.log("Error reading external waitlist spreadsheet (" + externalSpreadsheetId + "): " + e);
-      // fall through to fallback below
-    }
-  }
-
-  // Fallback: read from RSVP Players tab by Group column
-  return getPlayerEmailsByGroup(dayString, groupType);
-}
-
-// Not used as of 2023-01-01?
-function getRosterEmailAddressesFromRosterSpreadsheet(dayString) {
-  const spreadsheet = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
-  const emailRange = spreadsheet.getRangeByName(getRosterEmailRangeName(dayString));
-  const emails = getSpreadsheetRangeValuesAsArray(emailRange);
-  return emails.join(', ');
-}
-
-// Not used as of 2023-01-01?
-function getWaitlistEmailAddressesFromRosterSpreadsheet(dayString) {
-  const spreadsheet = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
-  const allEmails =
-    getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(ALL_EMAIL_RANGE_NAME));
-  const rosterEmailsForDay =
-    getSpreadsheetRangeValuesAsArray(spreadsheet.getRangeByName(getRosterEmailRangeName(dayString)));
-
-  var emails = removeFromArray(
-    allEmails,
-    rosterEmailsForDay);
-  emails = removeDuplicatesFromArray(emails);
-  return emails.join(', ');
 }
 
 function getRsvpSignupUrl(dayString) {

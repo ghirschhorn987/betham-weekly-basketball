@@ -1,6 +1,17 @@
 //========================================
 // Roster spreadsheet helper functions
 //========================================
+function getRosterSpreadsheetId() {
+  if (USE_OVERRIDE_VALUES) {
+    return OVERRIDE_ROSTER_SPREADSHEET_ID;
+  }
+  return ROSTER_SPREADSHEET_ID;
+}
+
+function getRosterSpreadsheet() {
+  return SpreadsheetApp.openById(getRosterSpreadsheetId);
+}
+
 function getRosterEmailRangeName(dayString) {
   switch (dayString) {
     case "sunday": return ROSTER_EMAIL_RANGE_NAME_SUNDAY;
@@ -11,13 +22,11 @@ function getRosterEmailRangeName(dayString) {
 }
 
 function getLastRunDayOfWeekRange() {
-  const spreadsheet = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
-  return spreadsheet.getRangeByName(LAST_RUN_DAY_OF_WEEK_RANGE);
+  return getRosterSpreadsheet().getRangeByName(LAST_RUN_DAY_OF_WEEK_RANGE);
 }
 
 function getLastStepThatWasRunRange() {
-  const spreadsheet = SpreadsheetApp.openById(ROSTER_SPREADSHEET_ID);
-  return spreadsheet.getRangeByName(LAST_STEP_THAT_WAS_RUN_RANGE);
+  return getRosterSpreadsheet().getRangeByName(LAST_STEP_THAT_WAS_RUN_RANGE);
 }
 
 //========================================
@@ -36,12 +45,16 @@ function getRsvpSpreadsheetId(dayString) {
   }
 }
 
+function getRsvpSpreadsheet(dayString) {
+  return SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
+}
+
 function getRsvpSpreadsheetRangeForGameDate(gameDate, rangeSpec) {
   const dayString = getDateAsDayString(gameDate);
-  const spreadsheet = SpreadsheetApp.openById(getRsvpSpreadsheetId(dayString));
-  const tab = getRsvpTabForDate(spreadsheet, gameDate, dayString);
+  const rsvpSpreadsheet = getRsvpSpreadsheet(dayString);
+  const tab = getRsvpTabForDate(rsvpSpreadsheet, gameDate, dayString);
   if (tab == null) {
-    throw new Error("No tab found. spreadsheet=" + spreadsheet.getName() + ", gameDate=" + gameDate + ", day=" + dayString + ", tabName= " + getRsvpTabNameForDate(gameDate, dayString));
+    throw new Error("No tab found. rsvpSpreadsheet=" + rsvpSpreadsheet.getName() + ", gameDate=" + gameDate + ", day=" + dayString + ", tabName= " + getRsvpTabNameForDate(gameDate, dayString));
   }
   return tab.getRange(rangeSpec);
 }

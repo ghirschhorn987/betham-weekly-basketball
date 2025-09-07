@@ -5,6 +5,7 @@
 var USE_OVERRIDE_VALUES = true;
 
 const OVERRIDE_EMAIL_RECIPIENT_LIST = "ghirschhorn987@gmail.com";
+const OVERRIDE_ROSTER_SPREADSHEET_ID = "12RZOtExnlzukmODadbZxOjcL_2DYHbqTWbmIjpVwKHI"; // "SCRATCH COPY: Beth Am Basketball Rosters"
 const OVERRIDE_RSVP_SPREADSHEET_ID = "1tTdOgJaba8QwJBtt2iiXJGbdXE91jSw2Ps6ZP2F2HX8"; // "SCRATCH COPY:  Beth Am THURSDAY Basketball - RSVP"
 const OVERRIDE_ROSTER_EMAIL_SUBJECT = "TESTING - IGNORE THIS. Beth Am Basketball: Sign up for Thursday, Aug 28, 8-10pm";
 const OVERRIDE_WAITLIST_EMAIL_SUBJECT = "Beth Am THURSDAY Basketball: Possible open spots for tonight, Aug 28, 8-10pm";
