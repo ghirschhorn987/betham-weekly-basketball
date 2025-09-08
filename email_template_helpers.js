@@ -89,7 +89,7 @@ We may have some open spots for basketball tonight (<<GAME_TIME>>) at Temple Bet
 <p>Some other points:
 <ul>
   <li>You can add additional messaging to me or others after the first word. <b>I will try to read and respond but there are no guarantees!</b>
-  <li>The sequence used for filling up spots is randomized order for all those who respond in the first hour. Subsequent responses are added in order received after that.
+  <li>The sequence used for filling up open spots is a randomized ordering of those who respond in the first hour, with <b>first priority given to those on the Primary Reserve List</b>. That is, first the Primary Reserve List respondees are randomly sorted and added to the open spots. Then, the Secondary Reserve List respondees are randomly sorted and added to any remaining open spots. Responses after the first hour -- regardless of which Reserve List -- are added after that in the order received.
 </ul>
 
 <p>I will let you know by <<CONFIRMATION_TIME>> tonight if you are in or not.
@@ -111,7 +111,7 @@ If you are interested in playing:
 
 Some other points:
   - You can add additional messaging to me or others after the first word. I will try to read and respond but there are no guarantees!
-  - The sequence used for filling up spots is randomized order for all those who respond in the first hour. Subsequent responses are added in order received after that.
+  - The sequence used for filling up open spots is a randomized ordering of those who respond in the first hour, with first priority given to those on the Primary Reserve List. That is, first the Primary Reserve List respondees are randomly sorted and added to the open spots. Then, the Secondary Reserve List respondees are randomly sorted and added to any remaining open spots. Responses after the first hour -- regardless of which Reserve List -- are added after that in the order received.
 
 I will let you know by <<CONFIRMATION_TIME>> tonight if you are in or not.
 
