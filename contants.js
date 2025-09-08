@@ -2,7 +2,7 @@
 // Override certain constants for testing purposes. 
 // WARNING!!! Must set back to null when done for scripts to act correcdly
 //========================================
-var USE_OVERRIDE_VALUES = true;
+var USE_OVERRIDE_VALUES = false;
 
 const OVERRIDE_EMAIL_RECIPIENT_LIST = "ghirschhorn987@gmail.com";
 const OVERRIDE_ROSTER_SPREADSHEET_ID = "12RZOtExnlzukmODadbZxOjcL_2DYHbqTWbmIjpVwKHI"; // "SCRATCH COPY: Beth Am Basketball Rosters"
