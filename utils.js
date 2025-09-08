@@ -237,10 +237,10 @@ function getDayStringAsNumber(dayString) {
 
 function getDateAsDayString(date) {
   var dateObject = new Date(date);
-  Logger.log("getDateAsDayString: date=" + date);
-  Logger.log("getDateAsDayString: dateObject=" + dateObject);
-  Logger.log("getDateAsDayString: date.getDate()=" + date.getDay());
-  Logger.log("getDateAsDayString: dateObject.getDate()=" + dateObject.getDay());
+  // Logger.log("getDateAsDayString: date=" + date);
+  // Logger.log("getDateAsDayString: dateObject=" + dateObject);
+  // Logger.log("getDateAsDayString: date.getDate()=" + date.getDay());
+  // Logger.log("getDateAsDayString: dateObject.getDate()=" + dateObject.getDay());
 
   switch (dateObject.getDay()) {
     case 0: return "sunday";

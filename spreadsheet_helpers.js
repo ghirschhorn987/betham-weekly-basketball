@@ -9,7 +9,7 @@ function getRosterSpreadsheetId() {
 }
 
 function getRosterSpreadsheet() {
-  return SpreadsheetApp.openById(getRosterSpreadsheetId);
+  return SpreadsheetApp.openById(getRosterSpreadsheetId());
 }
 
 function getRosterEmailRangeName(dayString) {

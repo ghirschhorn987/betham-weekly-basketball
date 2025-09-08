@@ -3,11 +3,11 @@
 //========================================
 function runOnce_MANUALLY() {
   const gameDate = new Date("2025-08-28 00:00:00");
-  prepareRsvpSpreadsheetForDate(gameDate);
+  // prepareRsvpSpreadsheetForDate(gameDate);
   // createAndSendRosterEmailForDate(gameDate);
   // createAndSendWaitlistEmailForGameDate(gameDate);
   // replyInitialToWaitlistEmailResponsesForGameDate(gameDate);
-  // replyFinalToWaitlistEmailResponsesForDay(waitlistDayString);
+  replyFinalToWaitlistEmailResponsesForGameDate(gameDate);
 }
 
 function runEveryMinute() {
@@ -87,43 +87,42 @@ function runEveryMinute() {
 // High-level functions
 //========================================
 
-function prepareRsvpSpreadsheetForDate(date) {
-  addRsvpTabForDate(date);
-  const dayString = getDateAsDayString(date);
-  const previousDate = getDateForPreviousOccurrenceOfDayString(dayString);
-  hideRsvpTabForDate(previousDate);
+function prepareRsvpSpreadsheetForDate(gameDate) {
+  addRsvpTabForDate(gameDate);
+  const previousGameDate = addDaysToDate(gameDate, -7);
+  hideRsvpTabForDate(previousGameDate);
 }
 
-function addRsvpTabForDate(date) {
-  const dayString = getDateAsDayString(date);
-  Logger.log("Preparing RSVP spreadsheet for: " + dayString + ", " + date);
+function addRsvpTabForDate(gameDate) {
+  const dayString = getDateAsDayString(gameDate);
+  Logger.log("Preparing RSVP spreadsheet for: " + dayString + ", " + gameDate);
 
   // Create new sheet 
-  const templateRsvpTab = getRsvpTabFromTemplateSpreadsheet(date);
+  const templateRsvpTab = getRsvpTabFromTemplateSpreadsheet(gameDate);
   const rsvpSpreadsheet = getRsvpSpreadsheet(dayString);
   const newRsvpTab = copyTemplateRsvpTabToRsvpSpreadsheetTab(templateRsvpTab, rsvpSpreadsheet);
 
-  newRsvpTab.setName(getRsvpTabNameForDate(date, dayString));
+  newRsvpTab.setName(getRsvpTabNameForDate(gameDate, dayString));
 
   // Set date in new tab
   newRsvpTab.showSheet();
   rsvpSpreadsheet.setActiveSheet(newRsvpTab);
-  newRsvpTab.getRange("A7").getCell(1, 1).setValue(getRsvpTabNameForDate(date, dayString));
+  newRsvpTab.getRange("A7").getCell(1, 1).setValue(getRsvpTabNameForDate(gameDate, dayString));
 
   // Add RSVP for Gary
-  if (!isNoGameOnDate(date) && AUTOMATICALLY_RSVP_FOR_GHIRSCHHORN) {
+  if (!isNoGameOnDate(gameDate) && AUTOMATICALLY_RSVP_FOR_GHIRSCHHORN) {
     newRsvpTab.getRange(RSVP_CELLS_IN_GAME_RANGE).getCell(1, 1).setValue(GHIRSCHHORN_NAME);
     newRsvpTab.getRange(RSVP_CELLS_IN_GAME_RANGE).getCell(1, 2).setValue(GHIRSCHHORN_EMAIL);
   }
 
-  Logger.log("Finished preparing RSVP spreadsheet for: " + dayString + ", " + date);
+  Logger.log("Finished preparing RSVP spreadsheet for: " + dayString + ", " + gameDate);
 }
 
-function hideRsvpTabForDate(date) {
-  Logger.log("Hiding RSVP Table for date: " + date);
-  const dayString = getDateAsDayString(date);
+function hideRsvpTabForDate(gameDate) {
+  Logger.log("Hiding RSVP Table for date: " + gameDate);
+  const dayString = getDateAsDayString(gameDate);
   const rsvpSpreadsheet = getRsvpSpreadsheet(dayString);
-  const oldTab = getRsvpTabForDate(rsvpSpreadsheet, date, dayString);
+  const oldTab = getRsvpTabForDate(rsvpSpreadsheet, gameDate, dayString);
   Logger.log("Hiding oldTab: " + oldTab);
   oldTab.hideSheet();
 }
@@ -159,12 +158,11 @@ function replyInitialToWaitlistEmailResponsesForGameDate(gameDate) {
   const gameDayString = getDateAsDayString(gameDate);
   Logger.log("Initial replying to waitlist email responses for day=" + gameDayString + ", gameDate=" + gameDate);
 
+  // Collect responses and classify by group
   var inResponsesMapPrimary = new Map();
   var inResponsesMapSecondary = new Map();
   const outResponsesMap = new Map();
   const otherResponsesMap = new Map();
-
-  // Collect responses and classify by group
   addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap);
 
   // Randomize each group separately
@@ -194,12 +192,73 @@ function replyInitialToWaitlistEmailResponsesForGameDate(gameDate) {
   Logger.log("Finished initial replying to waitlist email responses for day=" + gameDayString + ", gameDate=" + gameDate);
 }
 
+
+function replyFinalToWaitlistEmailResponsesForGameDate(gameDate) {
+  const gameDayString = getDateAsDayString(gameDate);
+  Logger.log("Final replying to waitlist email responses for day=" + gameDayString + ", gameDate=" + gameDate);
+
+  const waitlistRange = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_WAITLIST_RANGE);
+  const waitlistPlayerSet = getPlayerSetFromRange(waitlistRange);
+  Logger.log("Initial waitlistPlayerSet=" + Array.from(waitlistPlayerSet));
+
+  // Collect responses and classify by group
+  var inResponsesMapPrimary = new Map();
+  var inResponsesMapSecondary = new Map();
+  const outResponsesMap = new Map();
+  const otherResponsesMap = new Map();
+  addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap);
+  Logger.log("\r\nFinal IN PRIMARY:\r\n" + arrayAsNewLineSeparatedString(Array.from(inResponsesMapPrimary.keys())));
+  Logger.log("\r\nFinal IN SECONDARY:\r\n" + arrayAsNewLineSeparatedString(Array.from(inResponsesMapSecondary.keys())));
+  Logger.log("\r\nFinal OUT:\r\n" + arrayAsNewLineSeparatedString(Array.from(outResponsesMap.keys())));
+  Logger.log("\r\nFinal OTHER:\r\n" + arrayAsNewLineSeparatedString(Array.from(otherResponsesMap.keys())));
+
+  for (const item of inResponsesMapPrimary.keys()) {
+    waitlistPlayerSet.add(item);
+  }
+  for (const item of inResponsesMapSecondary.keys()) {
+    waitlistPlayerSet.add(item);
+  }
+  for (const item of outResponsesMap.keys()) {
+    waitlistPlayerSet.delete(item);
+  }
+  Logger.log("Modified waitlistPlayerSet=" + Array.from(waitlistPlayerSet));
+
+  const openSpotCountBeforeAdding = getOpenSpotCountForDate(gameDate);
+  Logger.log("Initial openSpotCountBeforeAdding=" + openSpotCountBeforeAdding);
+
+  waitlistRange.clearContent();
+  const rsvpRange = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_RANGE);
+  const playersAddedArray = addValuesArrayToSpreadsheetRange(rsvpRange, Array.from(waitlistPlayerSet), true);
+
+  Logger.log("openSpotCount after adding =" + getOpenSpotCountForDate(gameDate));
+
+  const inGame = new Set();
+  const waitlistForGame = new Set();
+  var i = 1;
+  playersAddedArray.forEach(function (item) {
+    if (i <= openSpotCountBeforeAdding) {
+      inGame.add(item);
+    } else {
+      waitlistForGame.add(item);
+    }
+    i++;
+  });
+
+  const thread = getWaitlistEmailThreadForGameDate(gameDate);
+  const htmlBody = getFinalWaitlistReplyEmailBody(gameDayString, openSpotCountBeforeAdding, Array.from(inGame), Array.from(waitlistForGame), true);
+  forwardEmail(thread, EMAIL_GROUP_ADMINS + "," + playersAddedArray.toString(), htmlBody, "last");
+
+  Logger.log("Finished final replying to waitlist email responses for day=" + gameDayString + ", gameDate=" + gameDate);
+}
+
 // Helper to classify responses by group
 function addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap) {
   const dayString = getDateAsDayString(gameDate);
   Logger.log("addWaitlistEmailResponsesToMapsForDayByGroup(dayString). dayString=" + dayString + ", gameDate=" + gameDate);
-
   const thread = getWaitlistEmailThreadForGameDate(gameDate);
+
+  var rosterTypeToPlayerStrings = getRosterTypeToPlayerStrings();
+
   const messages = thread.getMessages();
   for (var i = 0; i < messages.length; i++) {
     var msg = messages[i];
@@ -210,16 +269,8 @@ function addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponses
     // to group but it reported it did. Not sure where it got it from -- possibly/probably from an earlier reply in the thread
     // and it got confused.
     var latestReply = msg.getPlainBody();
-
     var playerString = normalizePlayerString(msg.getFrom());
-    var rosterTypeToPlayerStrings = getRosterTypeToPlayerStrings();
-
     Logger.log("WaitlistEmailReply. msg.getFrom()=" + msg.getFrom() + ", playerString=" + playerString);
-    Logger.log("msg=" + msg + ", msg.getPlainBody()=" + msg.getPlainBody().substring(0, 100) + "... , msg.getBody()=" + msg.getBody().substring(0, 100) + "...");
-
-    // if (playerString.includes("ghirschhorn987")) {
-    //   Logger.log("Found ghirschhorn987. msg=" + msg + ", msg.getPlainBody()=" + msg.getPlainBody().substring(0, 100) + "... , msg.getBody()=" + msg.getBody().substring(0, 100) + "...");
-    // }
 
     if (isInGameReply(latestReply)) {
       if (isMainRosterPlayerString(playerString, rosterTypeToPlayerStrings)) {
@@ -247,7 +298,7 @@ function addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponses
 // Script-specific helper functions
 //========================================
 function getRsvpTabFromTemplateSpreadsheet(date) {
-  Logger.log("getRsvpTabFromTemplateSpreadsheed(date). date=" + date);
+  Logger.log("getRsvpTabFromTemplateSpreadsheet(date). date=" + date);
   const templateSpreadsheet = SpreadsheetApp.openById(SIGNUP_SHEET_TEMPLATE_SPREADSHEET_ID);
   var templateTab;
   var isNoGame = isNoGameOnDate(date);
@@ -273,9 +324,6 @@ function isInGameReply(latestReply) {
 function isOutOfGameReply(latestReply) {
   var normalizedMessage = latestReply.trimStart().toLowerCase();
   var isOutOfGameReply = normalizedMessage.startsWith(WAITLIST_OUT_OF_GAME_REPLY_LOWERCASE);
-  if (isOutOfGameReply) {
-    Logger.log("outOfGameReply=" + isOutOfGameReply + ", latestReply= " + latestReply + ", normalizedMessage=" + normalizedMessage);
-  }
   return isOutOfGameReply;
 }
 
