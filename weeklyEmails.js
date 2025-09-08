@@ -2,12 +2,16 @@
 // Main functions
 //========================================
 function runOnce_MANUALLY() {
+  if (USE_OVERRIDE_VALUES != true) {
+    throw new Error("Aborting manual test! USE_OVERRIDE_VALUES is not true. USE_OVERRIDE_VALUES=" + USE_OVERRIDE_VALUES);
+  }
+
   const gameDate = new Date("2025-08-28 00:00:00");
   // prepareRsvpSpreadsheetForDate(gameDate);
   // createAndSendRosterEmailForDate(gameDate);
-  // createAndSendWaitlistEmailForGameDate(gameDate);
+  createAndSendWaitlistEmailForGameDate(gameDate);
   // replyInitialToWaitlistEmailResponsesForGameDate(gameDate);
-  replyFinalToWaitlistEmailResponsesForGameDate(gameDate);
+  // replyFinalToWaitlistEmailResponsesForGameDate(gameDate);
 }
 
 function runEveryMinute() {
