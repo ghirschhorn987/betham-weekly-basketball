@@ -66,39 +66,22 @@ const EMAIL_GROUP_ROSTER_NON_SUNDAY = "beth-am-basketball-roster-non-sunday@goog
 const EMAIL_GROUP_ROSTER_NON_TUESDAY = "beth-am-basketball-roster-non-tuesday@googlegroups.com";
 const EMAIL_GROUP_ROSTER_NON_THURSDAY = "beth-am-basketball-roster-non-thursday@googlegroups.com";
 
-// Optional: If you keep your primary and secondary waitlist email lists in
-// dedicated Google Sheets, set their spreadsheet IDs here. If left blank,
-// the code will fall back to reading the "Players" tab in the RSVP spreadsheet
-// for the given day and using the "Group" column values (existing behavior).
-const PRIMARY_WAITLIST_SPREADSHEET_ID = ""; // e.g. "1AbC..."
-const SECONDARY_WAITLIST_SPREADSHEET_ID = ""; // e.g. "1XyZ..."
-
 // Scheduled says when there is no game (due to gym not available or other reasons).
 // Important, we need to time and time zone so that date is interpreted as Los Angeles
 // date and not UTC. Time doesn't matter that much but use 5:00 so that if we accidentally
 // use PDT instead (which is 1 hour later), we are still on same date.
 // (PDT is 2nd Sunday in March to 1st Sunday in November, PST is other times)
 const NO_GAME_DATES = new Set();
-// NO GAMES 2025 SPRING
-// Sun:  Feb 09, Mar 23, Apr 13, Apr 20, Jun 01, Jun 08
-// Tue:  Feb 04, Apr 15, June 03, June 10
-// Thur: Feb 06, Feb 13, Mar 13, Mar 27, Apr 17, May 15, May 29, Jun 05
-NO_GAME_DATES.add((getDateAsString(new Date("2025-02-04 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-02-06 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-02-09 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-02-13 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-03-13 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-03-23 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-03-27 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-04-13 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-04-15 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-04-17 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-04-20 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-05-15 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-05-29 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-06-01 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-06-03 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-06-05 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-06-08 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-06-10 05:00 PDT"))));
-
+// NO GAMES 2025 FALL
+// Sun:  Sep 21
+// Tue:  Jul 07, Sep 23, Oct 07, Oct 14, Nov 11
+// Thur: Oct 02, Nov 27, Dec 25
+NO_GAME_DATES.add((getDateAsString(new Date("2025-07-07 05:00 PDT"))));
+NO_GAME_DATES.add((getDateAsString(new Date("2025-09-21 05:00 PDT"))));
+NO_GAME_DATES.add((getDateAsString(new Date("2025-09-23 05:00 PDT"))));
+NO_GAME_DATES.add((getDateAsString(new Date("2025-10-02 05:00 PDT"))));
+NO_GAME_DATES.add((getDateAsString(new Date("2025-10-07 05:00 PDT"))));
+NO_GAME_DATES.add((getDateAsString(new Date("2025-10-14 05:00 PDT"))));
+NO_GAME_DATES.add((getDateAsString(new Date("2025-11-11 05:00 PDT"))));
+NO_GAME_DATES.add((getDateAsString(new Date("2025-11-27 05:00 PDT"))));
+NO_GAME_DATES.add((getDateAsString(new Date("2025-12-25 05:00 PST"))));
