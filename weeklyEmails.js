@@ -9,7 +9,7 @@ function runOnce_MANUALLY() {
   const gameDate = new Date("2025-08-28 00:00:00");
   // prepareRsvpSpreadsheetForDate(gameDate);
   // createAndSendRosterEmailForDate(gameDate);
-  createAndSendWaitlistEmailForGameDate(gameDate);
+  // createAndSendWaitlistEmailForGameDate(gameDate);
   // replyInitialToWaitlistEmailResponsesForGameDate(gameDate);
   // replyFinalToWaitlistEmailResponsesForGameDate(gameDate);
 }

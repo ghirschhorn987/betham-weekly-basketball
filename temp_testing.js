@@ -524,6 +524,57 @@ function thisThisEmailIsTheFinalConfirmation() {
   })
 }
 
+/**
+ * Adds a member to a Google Group using the Admin SDK Directory API.
+ * @param {string} name - The display name of the member.
+ * @param {string} email - The email address of the member.
+ * @param {string} groupEmail - The email address of the Google Group.
+ * @returns {object} The response from the API.
+ */
+function addMemberToGoogleGroup(name, email, groupEmail) {
+  // Requires Admin SDK Directory API enabled and service account with domain-wide delegation
+  // This function assumes use in Google Apps Script with advanced services enabled
+  // See: https://developers.google.com/apps-script/advanced/admin-sdk
+  try {
+    var member = {
+      email: email,
+      role: 'MEMBER',
+      type: 'USER',
+      delivery_settings: 'ALL_MAIL',
+      // Optionally set display name if supported
+      'name': name
+    };
+    var response = AdminDirectory.Members.insert(member, groupEmail);
+    Logger.log('Added member: ' + JSON.stringify(response));
+    return response;
+  } catch (e) {
+    Logger.log('Error adding member: ' + e);
+    throw e;
+  }
+}
+
+/**
+ * Adds a list of members to the Beth Am Basketball Reserves Google Group.
+ * Uses addMemberToGoogleGroup for each member.
+ */
+function addReservesMembers() {
+  var groupEmail = EMAIL_GROUP_RESERVES;
+  var members = [
+    { name: 'TESTING ONLY - GHIRSCHORN1', email: 'ghirschhorn1@gmail.com' },
+  ];
+  var results = [];
+  members.forEach(function(member) {
+    try {
+      var res = addMemberToGoogleGroup(member.name, member.email, groupEmail);
+      results.push({ member: member, result: res });
+    } catch (e) {
+      results.push({ member: member, error: e });
+    }
+  });
+  Logger.log('Add members results: ' + JSON.stringify(results));
+  return results;
+}
+
 
 
 
