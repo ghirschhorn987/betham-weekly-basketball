@@ -66,21 +66,21 @@ function runEveryMinute() {
   } else if (currentHourOfDay == 12) {
     // At 12 noon: send waitlist emails if not sent
     if (waitlistDayString != "" && lastStepThatWasRun != "WAITLIST EMAIL") {
-      createAndSendWaitlistEmailForGameDate(gameDate);
+      createAndSendWaitlistEmailForGameDate(currentDate);
       addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["WAITLIST EMAIL"], false);
     }
 
   } else if (currentHourOfDay == 13) {
     // At 1 pm: send initial waitlist reply if not sent
     if (waitlistDayString != "" && lastStepThatWasRun != "INITIAL WAITLIST REPLY") {
-      replyInitialToWaitlistEmailResponsesForGameDate(gameDate);
+      replyInitialToWaitlistEmailResponsesForGameDate(currentDate);
       addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["INITIAL WAITLIST REPLY"], false);
     }
 
   } else if (currentHourOfDay >= 17 && currentHourOfDay <= 19) {
     // Between 5 and 7:59pm: send initial waitlist reply if not sent
     if (waitlistDayString != "" && lastStepThatWasRun != "FINAL WAITLIST REPLY") {
-      replyFinalToWaitlistEmailResponsesForDay(waitlistDayString);
+      replyFinalToWaitlistEmailResponsesForGameDate(currentDate);
       addValuesArrayToSpreadsheetRange(lastStepThatWasRunRange, ["FINAL WAITLIST REPLY"], false);
     }
   }
