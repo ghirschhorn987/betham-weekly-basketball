@@ -217,3 +217,83 @@ Gary
 
   return body;
 }
+
+function getSynchronizedWaitlistUpdateEmailBody(dayString, playersAddedToGame, playersAddedToWaitlist, playersDroppedFromGame, playersDroppedFromWaitlist, currentWaitlistOrder, useHtml) {
+  var body;
+  if (useHtml) {
+    body = `
+This email is an update regarding waitlist changes for basketball tonight (<<GAME_TIME>>) at Temple Beth Am.
+
+<p><b>Players added to the game:</b>
+<<PLAYERS_ADDED_TO_GAME>>
+
+<p><b>Players added to the waitlist:</b>
+<<PLAYERS_ADDED_TO_WAITLIST>>
+
+<p><b>Players who dropped out of the game:</b>
+<<PLAYERS_DROPPED_FROM_GAME>>
+
+<p><b>Players who dropped off the waitlist:</b>
+<<PLAYERS_DROPPED_FROM_WAITLIST>>
+
+<p><b>Current waitlist order:</b>
+<<CURRENT_WAITLIST_ORDER>>
+
+<p>If you have replied "In" but later realize you can't play, please reply again with "Out". (Only the last response is counted.)
+
+<p>Regards,
+<br>Gary
+`;
+  } else {
+    body = `
+This email is an update regarding waitlist changes for basketball tonight (<<GAME_TIME>>) at Temple Beth Am.
+
+Players added to the game:
+<<PLAYERS_ADDED_TO_GAME>>
+
+Players added to the waitlist:
+<<PLAYERS_ADDED_TO_WAITLIST>>
+
+Players who dropped out of the game:
+<<PLAYERS_DROPPED_FROM_GAME>>
+
+Players who dropped off the waitlist:
+<<PLAYERS_DROPPED_FROM_WAITLIST>>
+
+Current waitlist order:
+<<CURRENT_WAITLIST_ORDER>>
+
+If you have replied "In" but later realize you can't play, please reply again with "Out". (Only the last response is counted.)
+
+Regards,
+Gary
+`;
+  }
+
+  body = body.replace("<<GAME_TIME>>", getGameTimeString(dayString));
+  if (useHtml) {
+    body = body.replace("<<PLAYERS_ADDED_TO_GAME>>",
+      playersAddedToGame.length > 0 ? arrayAsHtmlItemizedList(playersAddedToGame) : "<i>None</i>");
+    body = body.replace("<<PLAYERS_ADDED_TO_WAITLIST>>",
+      playersAddedToWaitlist.length > 0 ? arrayAsHtmlItemizedList(playersAddedToWaitlist) : "<i>None</i>");
+    body = body.replace("<<PLAYERS_DROPPED_FROM_GAME>>",
+      playersDroppedFromGame.length > 0 ? arrayAsHtmlItemizedList(playersDroppedFromGame) : "<i>None</i>");
+    body = body.replace("<<PLAYERS_DROPPED_FROM_WAITLIST>>",
+      playersDroppedFromWaitlist.length > 0 ? arrayAsHtmlItemizedList(playersDroppedFromWaitlist) : "<i>None</i>");
+    body = body.replace("<<CURRENT_WAITLIST_ORDER>>",
+      currentWaitlistOrder.length > 0 ? arrayAsHtmlItemizedList(currentWaitlistOrder) : "<i>Empty</i>");
+  } else {
+    body = body.replace("<<PLAYERS_ADDED_TO_GAME>>",
+      playersAddedToGame.length > 0 ? arrayAsNewLineSeparatedString(playersAddedToGame) : "None");
+    body = body.replace("<<PLAYERS_ADDED_TO_WAITLIST>>",
+      playersAddedToWaitlist.length > 0 ? arrayAsNewLineSeparatedString(playersAddedToWaitlist) : "None");
+    body = body.replace("<<PLAYERS_DROPPED_FROM_GAME>>",
+      playersDroppedFromGame.length > 0 ? arrayAsNewLineSeparatedString(playersDroppedFromGame) : "None");
+    body = body.replace("<<PLAYERS_DROPPED_FROM_WAITLIST>>",
+      playersDroppedFromWaitlist.length > 0 ? arrayAsNewLineSeparatedString(playersDroppedFromWaitlist) : "None");
+    body = body.replace("<<CURRENT_WAITLIST_ORDER>>",
+      currentWaitlistOrder.length > 0 ? arrayAsNewLineSeparatedString(currentWaitlistOrder) : "Empty");
+  }
+
+  return body;
+}

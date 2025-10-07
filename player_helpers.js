@@ -48,6 +48,41 @@ function getEmailFromPlayerString(playerString) {
   return email.trim();
 }
 
+
+/**
+ * Helper function to check if a player is in a set using email-based comparison
+ * @param {string} playerString - The player to check for
+ * @param {Set} playerSet - The set of players to search in
+ * @returns {boolean} - True if player is found in set
+ */
+function isPlayerInSet(playerString, playerSet) {
+  const playerEmail = getEmailFromPlayerString(playerString).toLowerCase();
+  for (const existingPlayer of playerSet) {
+    const existingEmail = getEmailFromPlayerString(existingPlayer).toLowerCase();
+    if (playerEmail === existingEmail) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Helper function to check if a player is in a player array using email-based comparison
+ * @param {string} playerString - The player to check for
+ * @param {Array} playerArray - The array of players to search in
+ * @returns {boolean} - True if player is found in array
+ */
+function isPlayerInPlayerArray(playerString, playerArray) {
+  const playerEmail = getEmailFromPlayerString(playerString).toLowerCase();
+  for (const existingPlayer of playerArray) {
+    const existingEmail = getEmailFromPlayerString(existingPlayer).toLowerCase();
+    if (playerEmail === existingEmail) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function removeDuplicatePlayersFromSet(playerStringSet) {
   const modifiedPlayerSet = new Set();
   const existingNames = new Set();
@@ -126,7 +161,7 @@ function logEmailAddressesAsCommaSeparatedListForTypeAndDay(listType, dayString)
   Logger.log("listType=" + listType + ", day=" + dayString);
 
   const rosterSpreadsheet = getRosterSpreadsheet();
-  
+
   var allPlayers = new Set(
     getSpreadsheetRangeValuesAsArray(rosterSpreadsheet.getRangeByName(ALL_EMAIL_RANGE_NAME)));
   allPlayers = removeDuplicatePlayersFromSet(allPlayers);
