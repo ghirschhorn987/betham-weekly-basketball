@@ -106,6 +106,61 @@ function getPlayerSetFromRange(range) {
   return playerSet;
 }
 
+function getPlayerArrayFromRange(range) {
+  const playerArray = [];
+  for (let row = 1; row <= range.getHeight(); row++) {
+    const cell = range.getCell(row, 1);
+    if (!cell.isBlank()) {
+      playerArray.push(cell.getValue());
+    }
+  }
+  return playerArray;
+}
+
+function addValuesArrayToSpreadsheetRange(range, valuesArray, skipNonBlankCells = false) {
+  Logger.log("Adding " + valuesArray.length + " values to range.");
+  
+  let addedCount = 0;
+  let currentRow = 1;
+  
+  for (const value of valuesArray) {
+    // Find next available spot
+    while (currentRow <= range.getHeight()) {
+      const cell = range.getCell(currentRow, 1);
+      if (cell.isBlank() || !skipNonBlankCells) {
+        cell.setValue(value);
+        addedCount++;
+        currentRow++;
+        break;
+      }
+      currentRow++;
+    }
+    
+    // If we've reached the end of the range, stop
+    if (currentRow > range.getHeight()) {
+      Logger.log("Warning: Reached end of range. Could not add all values.");
+      break;
+    }
+  }
+  
+  Logger.log("Successfully added " + addedCount + " values to range.");
+  return addedCount;
+}
+
+function clearAndSetRangeValues(range, valuesArray) {
+  // Clear the entire range first
+  range.clearContent();
+  
+  // Add values in order
+  for (let i = 0; i < Math.min(valuesArray.length, range.getHeight()); i++) {
+    if (valuesArray[i]) {
+      range.getCell(i + 1, 1).setValue(valuesArray[i]);
+    }
+  }
+  
+  Logger.log("Cleared range and set " + Math.min(valuesArray.length, range.getHeight()) + " values.");
+}
+
 function addPlayerSetToSpreadsheetRange(range, requestedPlayersToAddSet) {
   Logger.log("Requested to add " + requestedPlayersToAddSet.size + " players to range.");
   var currentPlayersInRangeSet = getPlayerSetFromRange(range);

@@ -255,6 +255,155 @@ function replyFinalToWaitlistEmailResponsesForGameDate(gameDate) {
   Logger.log("Finished final replying to waitlist email responses for day=" + gameDayString + ", gameDate=" + gameDate);
 }
 
+/**
+ * Synchronizes waitlist email responses with the RSVP spreadsheet.
+ * Removes "out" players, adds "in" players to waitlist, moves waitlist players to open spots,
+ * and compresses the waitlist to eliminate gaps.
+ *
+ * @param {Date} gameDate - The date of the game to synchronize
+ */
+function synchronizeWaitlistWithRsvpSpreadsheet(gameDate) {
+  const gameDayString = getDateAsDayString(gameDate);
+  Logger.log("Starting synchronizeWaitlistWithRsvpSpreadsheet for day=" + gameDayString + ", gameDate=" + gameDate);
+
+  try {
+    // Step 1: Get current waitlist status from email responses
+    Logger.log("Step 1: Getting waitlist email responses...");
+    var inResponsesMapPrimary = new Map();
+    var inResponsesMapSecondary = new Map();
+    const outResponsesMap = new Map();
+    const otherResponsesMap = new Map();
+    addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap);
+
+    Logger.log("Email responses - IN PRIMARY: " + inResponsesMapPrimary.size + " players");
+    Logger.log("Email responses - IN SECONDARY: " + inResponsesMapSecondary.size + " players");
+    Logger.log("Email responses - OUT: " + outResponsesMap.size + " players");
+
+    // Step 2: Handle "out" players - remove them from both in-game and waitlist ranges
+    Logger.log("Step 2: Removing 'out' players from spreadsheet...");
+    const inGameRange = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_IN_GAME_RANGE);
+    const waitlistRange = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_WAITLIST_RANGE);
+    
+    let outPlayersRemoved = 0;
+    for (const playerString of outResponsesMap.keys()) {
+      outPlayersRemoved += removePlayerFromRange(inGameRange, playerString);
+      outPlayersRemoved += removePlayerFromRange(waitlistRange, playerString);
+    }
+    Logger.log("Removed " + outPlayersRemoved + " 'out' players from spreadsheet");
+
+    // Step 3: Handle "in" players - add them to waitlist if not already signed up
+    Logger.log("Step 3: Adding 'in' players to waitlist...");
+    const currentInGamePlayers = getPlayerSetFromRange(inGameRange);
+    const currentWaitlistPlayers = getPlayerSetFromRange(waitlistRange);
+    const allCurrentPlayers = new Set([...currentInGamePlayers, ...currentWaitlistPlayers]);
+
+    const playersToAdd = [];
+    // Add primary players first, then secondary players
+    for (const playerString of inResponsesMapPrimary.keys()) {
+      if (!isPlayerInSet(playerString, allCurrentPlayers)) {
+        playersToAdd.push(playerString);
+      }
+    }
+    for (const playerString of inResponsesMapSecondary.keys()) {
+      if (!isPlayerInSet(playerString, allCurrentPlayers)) {
+        playersToAdd.push(playerString);
+      }
+    }
+
+    if (playersToAdd.length > 0) {
+      const playersAddedCount = addValuesArrayToSpreadsheetRange(waitlistRange, playersToAdd, true);
+      Logger.log("Added " + playersAddedCount + " new players to waitlist");
+    } else {
+      Logger.log("No new players to add to waitlist");
+    }
+
+    // Step 4: Move waitlist players to open in-game spots
+    Logger.log("Step 4: Moving waitlist players to open spots...");
+    const openSpotCount = getOpenSpotCountForDate(gameDate);
+    Logger.log("Available open spots: " + openSpotCount);
+
+    if (openSpotCount > 0) {
+      const updatedWaitlistPlayers = getPlayerArrayFromRange(waitlistRange); // Use array to preserve order
+      
+      let playersMovedToGame = 0;
+      for (let i = 0; i < Math.min(openSpotCount, updatedWaitlistPlayers.length); i++) {
+        const playerToMove = updatedWaitlistPlayers[i];
+        
+        // Add to in-game range
+        const playerAdded = addValuesArrayToSpreadsheetRange(inGameRange, [playerToMove], true);
+        if (playerAdded > 0) { // addValuesArrayToSpreadsheetRange returns count, not array
+          // Remove from waitlist range
+          removePlayerFromRange(waitlistRange, playerToMove);
+          playersMovedToGame++;
+          Logger.log("Moved " + playerToMove + " from waitlist to in-game");
+        }
+      }
+      Logger.log("Moved " + playersMovedToGame + " players from waitlist to in-game spots");
+    } else {
+      Logger.log("No open spots available to move waitlist players");
+    }
+
+    // Step 5: Compress waitlist to eliminate gaps
+    Logger.log("Step 5: Compressing waitlist to eliminate gaps...");
+    const finalWaitlistPlayers = getPlayerArrayFromRange(waitlistRange); // Use array to preserve order
+    if (finalWaitlistPlayers.length > 0) {
+      // Clear the waitlist range and re-add players to eliminate gaps
+      clearAndSetRangeValues(waitlistRange, finalWaitlistPlayers); // Use new order-preserving function
+      Logger.log("Compressed waitlist: re-added " + finalWaitlistPlayers.length + " players in order");
+    } else {
+      Logger.log("Waitlist is empty - no compression needed");
+    }
+
+    Logger.log("Successfully completed synchronizeWaitlistWithRsvpSpreadsheet for day=" + gameDayString + ", gameDate=" + gameDate);
+
+  } catch (error) {
+    Logger.log("Error in synchronizeWaitlistWithRsvpSpreadsheet: " + error.toString());
+    throw error;
+  }
+}
+
+/**
+ * Helper function to remove a specific player from a range
+ * @param {Range} range - The spreadsheet range to search
+ * @param {string} playerString - The player string to remove
+ * @returns {number} - Number of players removed (0 or 1)
+ */
+function removePlayerFromRange(range, playerString) {
+  for (let row = 1; row <= range.getHeight(); row++) {
+    const cell = range.getCell(row, 1);
+    if (!cell.isBlank()) {
+      const currentPlayer = normalizePlayerString(cell.getValue());
+      if (playerStringsAreEqual(currentPlayer, playerString)) {
+        cell.clearContent();
+        // Also clear the email column if it exists (column 2)
+        if (range.getWidth() >= 2) {
+          range.getCell(row, 2).clearContent();
+        }
+        Logger.log("Removed player: " + playerString + " from row " + row);
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+/**
+ * Helper function to check if a player is in a set using email-based comparison
+ * @param {string} playerString - The player to check for
+ * @param {Set} playerSet - The set of players to search in
+ * @returns {boolean} - True if player is found in set
+ */
+function isPlayerInSet(playerString, playerSet) {
+  const playerEmail = getEmailFromPlayerString(playerString).toLowerCase();
+  for (const existingPlayer of playerSet) {
+    const existingEmail = getEmailFromPlayerString(existingPlayer).toLowerCase();
+    if (playerEmail === existingEmail) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Helper to classify responses by group
 function addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponsesMapPrimary, inResponsesMapSecondary, outResponsesMap, otherResponsesMap) {
   const dayString = getDateAsDayString(gameDate);

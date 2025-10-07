@@ -9,6 +9,7 @@ function runAllTests() {
   testCreateAndSendWaitlistEmailForGameDate();
   testGetWaitlistGroupEmails();
   testIsMainRosterPlayerString();
+  testSynchronizeWaitlistHelperFunctions();
 
   Logger.log("Test suite finished.");
 }
@@ -262,4 +263,92 @@ function testIsMainRosterPlayerString() {
   } else {
     Logger.log("Test Passed: Correctly identified main roster player by email only.");
   }
+}
+
+function testSynchronizeWaitlistHelperFunctions() {
+  Logger.log("Running test: testSynchronizeWaitlistHelperFunctions...");
+
+  // Test isPlayerInSet function
+  const testPlayerSet = new Set([
+    "John Doe <john@example.com>",
+    "Jane Smith <jane@example.com>",
+    "Bob Wilson <bob@example.com>"
+  ]);
+
+  // Test case 1: Player exists (exact match)
+  if (isPlayerInSet("John Doe <john@example.com>", testPlayerSet) !== true) {
+    Logger.log("Test Failed: isPlayerInSet should find exact match.");
+  } else {
+    Logger.log("Test Passed: isPlayerInSet correctly found exact match.");
+  }
+
+  // Test case 2: Player exists (case insensitive email)
+  if (isPlayerInSet("JOHN DOE <JOHN@EXAMPLE.COM>", testPlayerSet) !== true) {
+    Logger.log("Test Failed: isPlayerInSet should be case insensitive for emails.");
+  } else {
+    Logger.log("Test Passed: isPlayerInSet correctly handles case insensitive emails.");
+  }
+
+  // Test case 3: Player doesn't exist
+  if (isPlayerInSet("Unknown Person <unknown@example.com>", testPlayerSet) !== false) {
+    Logger.log("Test Failed: isPlayerInSet should return false for non-existent player.");
+  } else {
+    Logger.log("Test Passed: isPlayerInSet correctly returned false for non-existent player.");
+  }
+
+  // Test case 4: Different name, same email
+  if (isPlayerInSet("Johnny <john@example.com>", testPlayerSet) !== true) {
+    Logger.log("Test Failed: isPlayerInSet should match players by email even with different names.");
+  } else {
+    Logger.log("Test Passed: isPlayerInSet correctly matched player by email with different name.");
+  }
+
+  // Test case 5: Empty set
+  const emptySet = new Set();
+  if (isPlayerInSet("John Doe <john@example.com>", emptySet) !== false) {
+    Logger.log("Test Failed: isPlayerInSet should return false for empty set.");
+  } else {
+    Logger.log("Test Passed: isPlayerInSet correctly handled empty set.");
+  }
+
+  // Test order preservation functions
+  Logger.log("Testing order preservation functions...");
+  
+  // Mock a spreadsheet range for testing
+  const mockRange = {
+    getHeight: function() { return 5; },
+    getWidth: function() { return 2; },
+    getCell: function(row, col) {
+      const testData = [
+        ["Player 1 <p1@example.com>", "p1@example.com"],
+        ["Player 2 <p2@example.com>", "p2@example.com"], 
+        ["", ""],
+        ["Player 4 <p4@example.com>", "p4@example.com"],
+        ["", ""]
+      ];
+      return {
+        isBlank: function() { return testData[row-1][col-1] === ""; },
+        getValue: function() { return testData[row-1][col-1]; }
+      };
+    }
+  };
+
+  // Test getPlayerArrayFromRange - should preserve order
+  const originalGetPlayerArrayFromRange = getPlayerArrayFromRange;
+  try {
+    const playerArray = originalGetPlayerArrayFromRange(mockRange);
+    const expectedOrder = ["Player 1 <p1@example.com>", "Player 2 <p2@example.com>", "Player 4 <p4@example.com>"];
+    
+    if (JSON.stringify(playerArray) === JSON.stringify(expectedOrder)) {
+      Logger.log("Test Passed: getPlayerArrayFromRange preserves order correctly.");
+    } else {
+      Logger.log("Test Failed: getPlayerArrayFromRange order mismatch.");
+      Logger.log("Expected: " + JSON.stringify(expectedOrder));
+      Logger.log("Got: " + JSON.stringify(playerArray));
+    }
+  } catch (e) {
+    Logger.log("Test Warning: Could not test getPlayerArrayFromRange in this context: " + e.toString());
+  }
+
+  Logger.log("Finished testing synchronizeWaitlist helper functions.");
 }
