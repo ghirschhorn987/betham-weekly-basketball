@@ -216,10 +216,11 @@ function getSynchronizedWaitlistUpdateEmailBody(dayString, playersAddedToGame, p
       arrayAsHtmlItemizedList(currentWaitlistOrder) : "<i>Empty</i>";
       
     return `
-This email is an update regarding waitlist changes for basketball tonight (${gameTime}) at Temple Beth Am.
-
-<p><b>Players added to the game:</b>
+UPDATE: These players have been added to the game tonight (${gameTime}):
 ${playersAddedToGameList}
+
+<p><b>IF YOU HAVE BEEN ADDED BUT CANNOT PLAY, please Reply All to this email with the FIRST WORD BEING "OUT".</b>
+This will free up your spot for someone else.
 
 <p><b>Players added to the waitlist:</b>
 ${playersAddedToWaitlistList}
@@ -233,7 +234,7 @@ ${playersDroppedFromWaitlistList}
 <p><b>Current waitlist order:</b>
 ${currentWaitlistOrderList}
 
-<p>If you have replied "In" but later realize you can't play, please reply again with "Out". (Only the last response is counted.)
+<p>If you are in the game or on the waitlist but cannot play, please Reply All with "Out". 
 
 <p>Regards,
 <br>Gary
@@ -251,10 +252,10 @@ ${currentWaitlistOrderList}
       arrayAsNewLineSeparatedString(currentWaitlistOrder) : "Empty";
       
     return `
-This email is an update regarding waitlist changes for basketball tonight (${gameTime}) at Temple Beth Am.
-
-Players added to the game:
+UPDATE: These players have been added to the game tonight (${gameTime}):
 ${playersAddedToGameList}
+
+IF YOU HAVE BEEN ADDED BUT CANNOT PLAY, please Reply All to this email with the FIRST WORD BEING "OUT". This will free up your spot for someone else.
 
 Players added to the waitlist:
 ${playersAddedToWaitlistList}
@@ -268,7 +269,7 @@ ${playersDroppedFromWaitlistList}
 Current waitlist order:
 ${currentWaitlistOrderList}
 
-If you have replied "In" but later realize you can't play, please reply again with "Out". (Only the last response is counted.)
+If you are in the game or on the waitlist but cannot play, please Reply All with "Out". 
 
 Regards,
 Gary
