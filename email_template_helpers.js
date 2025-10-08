@@ -2,31 +2,30 @@
 // Email template helper functions
 //========================================
 function getRosterEmailSubject(dayString) {
-  var subject;
   if (USE_OVERRIDE_VALUES) {
-    subject = OVERRIDE_ROSTER_EMAIL_SUBJECT;
+    return OVERRIDE_ROSTER_EMAIL_SUBJECT;
   } else {
-    subject = "Beth Am <<DAY_UPPERCASE>> Basketball: Sign up for <<DAY_LOWERCASE>>, <<DATE>>, <<GAME_TIME>>";
-    subject = subject.replace("<<DAY_UPPERCASE>>", dayString.toUpperCase());
-    subject = subject.replace("<<DAY_LOWERCASE>>", capitalizeFirstLetter(dayString));
-    subject = subject.replace("<<DATE>>", getDateAsString(getDateForNextOccurrenceOfDay(dayString)));
-    subject = subject.replace("<<GAME_TIME>>", getGameTimeString(dayString));
+    const dayUppercase = dayString.toUpperCase();
+    const dayLowercase = capitalizeFirstLetter(dayString);
+    const date = getDateAsString(getDateForNextOccurrenceOfDay(dayString));
+    const gameTime = getGameTimeString(dayString);
+    
+    return `Beth Am ${dayUppercase} Basketball: Sign up for ${dayLowercase}, ${date}, ${gameTime}`;
   }
-  return subject;
 }
 
 function getWaitlistEmailSubjectForGameDate(gameDate) {
   const gameDayString = getDateAsDayString(gameDate);
-  var subject;
+  
   if (USE_OVERRIDE_VALUES) {
-    subject = OVERRIDE_WAITLIST_EMAIL_SUBJECT;
+    return OVERRIDE_WAITLIST_EMAIL_SUBJECT;
   } else {
-    subject = "Beth Am <<DAY_UPPERCASE>> Basketball: Possible open spots for tonight, <<DATE>>, <<GAME_TIME>>";
-    subject = subject.replace("<<DAY_UPPERCASE>>", gameDayString.toUpperCase());
-    subject = subject.replace("<<DATE>>", getDateAsString(gameDate));
-    subject = subject.replace("<<GAME_TIME>>", getGameTimeString(gameDayString));
+    const dayUppercase = gameDayString.toUpperCase();
+    const date = getDateAsString(gameDate);
+    const gameTime = getGameTimeString(gameDayString);
+    
+    return `Beth Am ${dayUppercase} Basketball: Possible open spots for tonight, ${date}, ${gameTime}`;
   }
-  return subject;
 }
 
 function getInitialWaitlistReplyEmailSubjectForGameDate(gameDate) {
@@ -38,43 +37,44 @@ function getFinalWaitlistReplyEmailSubjectForGameDate(gameDate) {
 }
 
 function getRosterEmailBody(dayString, useHtml) {
-  var body;
-  if (useHtml) {
-    body = `
-Sign-up for the <<DAY_OF_WEEK>> night game this week (<<DATE>>, <<GAME_TIME>>) is open here: <<SIGNUP_URL>>. (If this link doesn't work for you on mobile, try this <a href='<<ALTERNATE_SIGNUP_URL>>'>alternate link</a>. And let me know if this other link worked or not).
+  if (USE_OVERRIDE_VALUES) {
+    return OVERRIDE_ROSTER_EMAIL_BODY;
+  }
 
-<p> IMPORTANT: If after signing up you can't make it, simply remove yourself from the spreadsheet. No need to email if it is BEFORE 5pm on game day. AFTER 5pm, please both remove yourself AND email <<EMAIL_GROUP_ADMINS>>.
+  const dayOfWeek = dayString.toUpperCase();
+  const date = getDateAsString(getDateForNextOccurrenceOfDay(dayString));
+  const gameTime = getGameTimeString(dayString);
+  const signupUrl = getRsvpSignupUrl(dayString);
+  const alternateSignupUrl = getRsvpSignupAlternateUrl(dayString);
+  
+  if (useHtml) {
+    return `
+Sign-up for the ${dayOfWeek} night game this week (${date}, ${gameTime}) is open here: ${signupUrl}. (If this link doesn't work for you on mobile, try this <a href='${alternateSignupUrl}'>alternate link</a>. And let me know if this other link worked or not).
+
+<p> IMPORTANT: If after signing up you can't make it, simply remove yourself from the spreadsheet. No need to email if it is BEFORE 5pm on game day. AFTER 5pm, please both remove yourself AND email ${EMAIL_GROUP_ADMINS}.
 
 <p>Regards,
 <br>Gary
 `;
   } else {
-    body = `
-Sign-up for the <<DAY_OF_WEEK>> night game this week (<<DATE>>, <<GAME_TIME>>) is open here: <<SIGNUP_URL>>. (If this link doesn't work for you on mobile, try this alternate link: <<ALTERNATE_SIGNUP_URL>>. And let me know if this other link worked or not).
+    return `
+Sign-up for the ${dayOfWeek} night game this week (${date}, ${gameTime}) is open here: ${signupUrl}. (If this link doesn't work for you on mobile, try this alternate link: ${alternateSignupUrl}. And let me know if this other link worked or not).
 
-IMPORTANT: If after signing up you can't make it, simply remove yourself from the spreadsheet. No need to email if it is BEFORE 5pm on game day. AFTER 5pm, please both remove yourself AND email <<EMAIL_GROUP_ADMINS>>.
+IMPORTANT: If after signing up you can't make it, simply remove yourself from the spreadsheet. No need to email if it is BEFORE 5pm on game day. AFTER 5pm, please both remove yourself AND email ${EMAIL_GROUP_ADMINS}.
 
 Regards,
 Gary
 `;
   }
-
-  body = body.replace("<<DAY_OF_WEEK>>", dayString.toUpperCase());
-  body = body.replace("<<DATE>>", getDateAsString(getDateForNextOccurrenceOfDay(dayString)));
-  body = body.replace("<<GAME_TIME>>", getGameTimeString(dayString));
-  body = body.replace("<<SIGNUP_URL>>", getRsvpSignupUrl(dayString));
-  body = body.replace("<<ALTERNATE_SIGNUP_URL>>", getRsvpSignupAlternateUrl(dayString));
-  body = body.replace("<<EMAIL_GROUP_ADMINS>>", EMAIL_GROUP_ADMINS);
-
-  return body;
 }
 
 function getWaitlistEmailBody(dayString, useHtml) {
-  var body;
+  const gameTime = getGameTimeString(dayString);
+  const confirmationTime = WAITLIST_CONFIRMATION_TIME_STRING;
 
   if (useHtml) {
-    body = `
-We may have some open spots for basketball tonight (<<GAME_TIME>>) at Temple Beth Am. If you want to play, please follow the instructions carefully. 
+    return `
+We may have some open spots for basketball tonight (${gameTime}) at Temple Beth Am. If you want to play, please follow the instructions carefully. 
 
 <p><b>THIS IS AN AUTOMATED PROCESS. If you don't follow instructions, your reply will be ignored.</b>
 
@@ -92,14 +92,14 @@ We may have some open spots for basketball tonight (<<GAME_TIME>>) at Temple Bet
   <li>The sequence used for filling up open spots is a randomized ordering of those who respond in the first hour, with <b>first priority given to those on the Primary Reserve List</b>. That is, first the Primary Reserve List respondees are randomly sorted and added to the open spots. Then, the Secondary Reserve List respondees are randomly sorted and added to any remaining open spots. Responses after the first hour -- regardless of which Reserve List -- are added after that in the order received.
 </ul>
 
-<p>I will let you know by <<CONFIRMATION_TIME>> tonight if you are in or not.
+<p>I will let you know by ${confirmationTime} tonight if you are in or not.
 
 <p>Regards,
 <br>Gary
 `;
   } else {
-    body = `
-We may have some open spots for basketball tonight (<<GAME_TIME>>) at Temple Beth Am. If you want to play, please follow the instructions carefully. 
+    return `
+We may have some open spots for basketball tonight (${gameTime}) at Temple Beth Am. If you want to play, please follow the instructions carefully. 
 
 THIS IS AN AUTOMATED PROCESS. If you don't follow instructions, your reply will be ignored.
 
@@ -113,26 +113,27 @@ Some other points:
   - You can add additional messaging to me or others after the first word. I will try to read and respond but there are no guarantees!
   - The sequence used for filling up open spots is a randomized ordering of those who respond in the first hour, with first priority given to those on the Primary Reserve List. That is, first the Primary Reserve List respondees are randomly sorted and added to the open spots. Then, the Secondary Reserve List respondees are randomly sorted and added to any remaining open spots. Responses after the first hour -- regardless of which Reserve List -- are added after that in the order received.
 
-I will let you know by <<CONFIRMATION_TIME>> tonight if you are in or not.
+I will let you know by ${confirmationTime} tonight if you are in or not.
 
 Regards,
 Gary
 `;
   }
-
-  body = body.replace("<<GAME_TIME>>", getGameTimeString(dayString));
-  body = body.replace("<<CONFIRMATION_TIME>>", WAITLIST_CONFIRMATION_TIME_STRING);
-  return body;
 }
 
 function getInitialWaitlistReplyEmailBody(dayString, openSpotCount, emails, useHtml) {
-  var body;
+  const gameTime = getGameTimeString(dayString);
+  const confirmationTimeRange = WAITLIST_CONFIRMATION_TIME_RANGE_STRING;
+  const emailsList = useHtml ? 
+    arrayAsHtmlItemizedList(emails) : 
+    arrayAsNewLineSeparatedString(emails);
+
   if (useHtml) {
-    body = `
-We currently have <<OPEN_SPOTS>> open spots for basketball tonight (<<GAME_TIME>>) at Temple Beth Am. This number is tentative and may change -- final confirmation of who is in will be sent between <<CONFIRMATION_TIME_RANGE>>.
+    return `
+We currently have ${openSpotCount} open spots for basketball tonight (${gameTime}) at Temple Beth Am. This number is tentative and may change -- final confirmation of who is in will be sent between ${confirmationTimeRange}.
 
 <p>Here is the current waitlist in order:
-<<EMAILS_SEPARATED_BY_NEWLINES>>
+${emailsList}
 
 <p>If you have replied "In" but later realize you can't play, please reply again with "Out". (Only the last response is counted.)
 
@@ -140,11 +141,11 @@ We currently have <<OPEN_SPOTS>> open spots for basketball tonight (<<GAME_TIME>
 <br>Gary
 `;
   } else {
-    body = `
-We currently have <<OPEN_SPOTS>> open spots for basketball tonight (<<GAME_TIME>>) at Temple Beth Am. This number is tentative and may change -- final confirmation of who is in will be sent between <<CONFIRMATION_TIME_RANGE>>.
+    return `
+We currently have ${openSpotCount} open spots for basketball tonight (${gameTime}) at Temple Beth Am. This number is tentative and may change -- final confirmation of who is in will be sent between ${confirmationTimeRange}.
 
 Here is the current waitlist in order:
-<<EMAILS_SEPARATED_BY_NEWLINES>>
+${emailsList}
 
 If you have replied "In" but later realize you can't play, please reply again with "Out". (Only the last response is counted.)
 
@@ -152,32 +153,26 @@ Regards,
 Gary
 `;
   }
-
-  body = body.replace("<<OPEN_SPOTS>>", openSpotCount);
-  body = body.replace("<<GAME_TIME>>", getGameTimeString(dayString));
-  body = body.replace("<<CONFIRMATION_TIME_RANGE>>", WAITLIST_CONFIRMATION_TIME_RANGE_STRING);
-  if (useHtml) {
-    body = body.replace("<<EMAILS_SEPARATED_BY_NEWLINES>>",
-      arrayAsHtmlItemizedList(emails));
-  } else {
-    body = body.replace("<<EMAILS_SEPARATED_BY_NEWLINES>>",
-      arrayAsNewLineSeparatedString(emails));
-  }
-
-  return body;
 }
 
 function getFinalWaitlistReplyEmailBody(dayString, openSpotCount, emailsInGame, emailsOnWaitlist, useHtml) {
-  var body;
+  const gameTime = getGameTimeString(dayString);
+  const emailsInGameList = useHtml ? 
+    arrayAsHtmlItemizedList(emailsInGame) : 
+    arrayAsNewLineSeparatedString(emailsInGame);
+  const emailsOnWaitlistList = useHtml ? 
+    arrayAsHtmlItemizedList(emailsOnWaitlist) : 
+    arrayAsNewLineSeparatedString(emailsOnWaitlist);
+
   if (useHtml) {
-    body = `
-This email is the final confirmation of which waitlist players are in for basketball tonight (<<GAME_TIME>>) at Temple Beth Am. We have <<OPEN_SPOTS>> open spots.
+    return `
+This email is the final confirmation of which waitlist players are in for basketball tonight (${gameTime}) at Temple Beth Am. We have ${openSpotCount} open spots.
 
 <p>These players are in:
-<<EMAILS_IN_GAME_SEPARATED_BY_NEWLINES>>
+${emailsInGameList}
 
 <p>These players are next up if someone drops out:
-<<EMAILS_ON_WAITLIST_SEPARATED_BY_NEWLINES>>
+${emailsOnWaitlistList}
 
 <p>If you have replied "In" but later realize you can't play, please reply again with "Out". (Only the last response is counted.)
 
@@ -185,14 +180,14 @@ This email is the final confirmation of which waitlist players are in for basket
 <br>Gary
 `;
   } else {
-    body = `
-This email is the final confirmation of which waitlist players are in for basketball tonight (<<GAME_TIME>>) at Temple Beth Am. We have <<OPEN_SPOTS>> open spots.
+    return `
+This email is the final confirmation of which waitlist players are in for basketball tonight (${gameTime}) at Temple Beth Am. We have ${openSpotCount} open spots.
 
 These players are in:
-<<EMAILS_IN_GAME_SEPARATED_BY_NEWLINES>>
+${emailsInGameList}
 
 These players are next up if someone drops out:
-<<EMAILS_ON_WAITLIST_SEPARATED_BY_NEWLINES>>
+${emailsOnWaitlistList}
 
 If you have replied "In" but later realize you can't play, please reply again with "Out". (Only the last response is counted.)
 
@@ -200,44 +195,43 @@ Regards,
 Gary
 `;
   }
-
-  body = body.replace("<<OPEN_SPOTS>>", openSpotCount);
-  body = body.replace("<<GAME_TIME>>", getGameTimeString(dayString));
-  if (useHtml) {
-    body = body.replace("<<EMAILS_IN_GAME_SEPARATED_BY_NEWLINES>>",
-      arrayAsHtmlItemizedList(emailsInGame));
-    body = body.replace("<<EMAILS_ON_WAITLIST_SEPARATED_BY_NEWLINES>>",
-      arrayAsHtmlItemizedList(emailsOnWaitlist));
-  } else {
-    body = body.replace("<<EMAILS_IN_GAME_SEPARATED_BY_NEWLINES>>",
-      arrayAsNewLineSeparatedString(emailsInGame));
-    body = body.replace("<<EMAILS_ON_WAITLIST_SEPARATED_BY_NEWLINES>>",
-      arrayAsNewLineSeparatedString(emailsOnWaitlist));
-  }
-
-  return body;
 }
 
 function getSynchronizedWaitlistUpdateEmailBody(dayString, playersAddedToGame, playersAddedToWaitlist, playersDroppedFromGame, playersDroppedFromWaitlist, currentWaitlistOrder, useHtml) {
-  var body;
+  const gameTime = getGameTimeString(dayString);
+  
+  let playersAddedToGameList, playersAddedToWaitlistList, playersDroppedFromGameList, 
+      playersDroppedFromWaitlistList, currentWaitlistOrderList;
+      
   if (useHtml) {
-    body = `
-This email is an update regarding waitlist changes for basketball tonight (<<GAME_TIME>>) at Temple Beth Am.
+    playersAddedToGameList = playersAddedToGame.length > 0 ? 
+      arrayAsHtmlItemizedList(playersAddedToGame) : "<i>None</i>";
+    playersAddedToWaitlistList = playersAddedToWaitlist.length > 0 ? 
+      arrayAsHtmlItemizedList(playersAddedToWaitlist) : "<i>None</i>";
+    playersDroppedFromGameList = playersDroppedFromGame.length > 0 ? 
+      arrayAsHtmlItemizedList(playersDroppedFromGame) : "<i>None</i>";
+    playersDroppedFromWaitlistList = playersDroppedFromWaitlist.length > 0 ? 
+      arrayAsHtmlItemizedList(playersDroppedFromWaitlist) : "<i>None</i>";
+    currentWaitlistOrderList = currentWaitlistOrder.length > 0 ? 
+      arrayAsHtmlItemizedList(currentWaitlistOrder) : "<i>Empty</i>";
+      
+    return `
+This email is an update regarding waitlist changes for basketball tonight (${gameTime}) at Temple Beth Am.
 
 <p><b>Players added to the game:</b>
-<<PLAYERS_ADDED_TO_GAME>>
+${playersAddedToGameList}
 
 <p><b>Players added to the waitlist:</b>
-<<PLAYERS_ADDED_TO_WAITLIST>>
+${playersAddedToWaitlistList}
 
 <p><b>Players who dropped out of the game:</b>
-<<PLAYERS_DROPPED_FROM_GAME>>
+${playersDroppedFromGameList}
 
 <p><b>Players who dropped off the waitlist:</b>
-<<PLAYERS_DROPPED_FROM_WAITLIST>>
+${playersDroppedFromWaitlistList}
 
 <p><b>Current waitlist order:</b>
-<<CURRENT_WAITLIST_ORDER>>
+${currentWaitlistOrderList}
 
 <p>If you have replied "In" but later realize you can't play, please reply again with "Out". (Only the last response is counted.)
 
@@ -245,23 +239,34 @@ This email is an update regarding waitlist changes for basketball tonight (<<GAM
 <br>Gary
 `;
   } else {
-    body = `
-This email is an update regarding waitlist changes for basketball tonight (<<GAME_TIME>>) at Temple Beth Am.
+    playersAddedToGameList = playersAddedToGame.length > 0 ? 
+      arrayAsNewLineSeparatedString(playersAddedToGame) : "None";
+    playersAddedToWaitlistList = playersAddedToWaitlist.length > 0 ? 
+      arrayAsNewLineSeparatedString(playersAddedToWaitlist) : "None";
+    playersDroppedFromGameList = playersDroppedFromGame.length > 0 ? 
+      arrayAsNewLineSeparatedString(playersDroppedFromGame) : "None";
+    playersDroppedFromWaitlistList = playersDroppedFromWaitlist.length > 0 ? 
+      arrayAsNewLineSeparatedString(playersDroppedFromWaitlist) : "None";
+    currentWaitlistOrderList = currentWaitlistOrder.length > 0 ? 
+      arrayAsNewLineSeparatedString(currentWaitlistOrder) : "Empty";
+      
+    return `
+This email is an update regarding waitlist changes for basketball tonight (${gameTime}) at Temple Beth Am.
 
 Players added to the game:
-<<PLAYERS_ADDED_TO_GAME>>
+${playersAddedToGameList}
 
 Players added to the waitlist:
-<<PLAYERS_ADDED_TO_WAITLIST>>
+${playersAddedToWaitlistList}
 
 Players who dropped out of the game:
-<<PLAYERS_DROPPED_FROM_GAME>>
+${playersDroppedFromGameList}
 
 Players who dropped off the waitlist:
-<<PLAYERS_DROPPED_FROM_WAITLIST>>
+${playersDroppedFromWaitlistList}
 
 Current waitlist order:
-<<CURRENT_WAITLIST_ORDER>>
+${currentWaitlistOrderList}
 
 If you have replied "In" but later realize you can't play, please reply again with "Out". (Only the last response is counted.)
 
@@ -269,31 +274,4 @@ Regards,
 Gary
 `;
   }
-
-  body = body.replace("<<GAME_TIME>>", getGameTimeString(dayString));
-  if (useHtml) {
-    body = body.replace("<<PLAYERS_ADDED_TO_GAME>>",
-      playersAddedToGame.length > 0 ? arrayAsHtmlItemizedList(playersAddedToGame) : "<i>None</i>");
-    body = body.replace("<<PLAYERS_ADDED_TO_WAITLIST>>",
-      playersAddedToWaitlist.length > 0 ? arrayAsHtmlItemizedList(playersAddedToWaitlist) : "<i>None</i>");
-    body = body.replace("<<PLAYERS_DROPPED_FROM_GAME>>",
-      playersDroppedFromGame.length > 0 ? arrayAsHtmlItemizedList(playersDroppedFromGame) : "<i>None</i>");
-    body = body.replace("<<PLAYERS_DROPPED_FROM_WAITLIST>>",
-      playersDroppedFromWaitlist.length > 0 ? arrayAsHtmlItemizedList(playersDroppedFromWaitlist) : "<i>None</i>");
-    body = body.replace("<<CURRENT_WAITLIST_ORDER>>",
-      currentWaitlistOrder.length > 0 ? arrayAsHtmlItemizedList(currentWaitlistOrder) : "<i>Empty</i>");
-  } else {
-    body = body.replace("<<PLAYERS_ADDED_TO_GAME>>",
-      playersAddedToGame.length > 0 ? arrayAsNewLineSeparatedString(playersAddedToGame) : "None");
-    body = body.replace("<<PLAYERS_ADDED_TO_WAITLIST>>",
-      playersAddedToWaitlist.length > 0 ? arrayAsNewLineSeparatedString(playersAddedToWaitlist) : "None");
-    body = body.replace("<<PLAYERS_DROPPED_FROM_GAME>>",
-      playersDroppedFromGame.length > 0 ? arrayAsNewLineSeparatedString(playersDroppedFromGame) : "None");
-    body = body.replace("<<PLAYERS_DROPPED_FROM_WAITLIST>>",
-      playersDroppedFromWaitlist.length > 0 ? arrayAsNewLineSeparatedString(playersDroppedFromWaitlist) : "None");
-    body = body.replace("<<CURRENT_WAITLIST_ORDER>>",
-      currentWaitlistOrder.length > 0 ? arrayAsNewLineSeparatedString(currentWaitlistOrder) : "Empty");
-  }
-
-  return body;
 }
