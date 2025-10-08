@@ -66,22 +66,21 @@ const EMAIL_GROUP_ROSTER_NON_SUNDAY = "beth-am-basketball-roster-non-sunday@goog
 const EMAIL_GROUP_ROSTER_NON_TUESDAY = "beth-am-basketball-roster-non-tuesday@googlegroups.com";
 const EMAIL_GROUP_ROSTER_NON_THURSDAY = "beth-am-basketball-roster-non-thursday@googlegroups.com";
 
-// Scheduled says when there is no game (due to gym not available or other reasons).
-// Important, we need to time and time zone so that date is interpreted as Los Angeles
-// date and not UTC. Time doesn't matter that much but use 5:00 so that if we accidentally
-// use PDT instead (which is 1 hour later), we are still on same date.
-// (PDT is 2nd Sunday in March to 1st Sunday in November, PST is other times)
-const NO_GAME_DATES = new Set();
-// NO GAMES 2025 FALL
-// Sun:  Sep 21
-// Tue:  Jul 07, Sep 23, Oct 07, Oct 14, Nov 11
-// Thur: Oct 02, Nov 27, Dec 25
-NO_GAME_DATES.add((getDateAsString(new Date("2025-07-07 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-09-21 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-09-23 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-10-02 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-10-07 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-10-14 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-11-11 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-11-27 05:00 PDT"))));
-NO_GAME_DATES.add((getDateAsString(new Date("2025-12-25 05:00 PST"))));
+// Scheduled dates when there is no game (due to gym not available or other reasons).
+// Important, we need to set time and time zone so that date is interpreted as Los Angeles
+// date and not UTC. Time part doesn't matter that much but we use 5:00 so that it is interpeted
+// as the same date regardless of whether PST or PDT (which is 1 hour later) is specified correctly.
+// (As of 2025, PDT is 2nd Sunday in March to 1st Sunday in November, PST is other times)
+const NO_GAME_DATES = new Set([
+    // 2025 NO GAMES
+    "2025-07-07", // Tue
+    "2025-09-21", // Sun
+    "2025-09-23", // Tue
+    "2025-10-02", // Thu
+    "2025-10-07", // Tue
+    "2025-10-14", // Tue
+    "2025-11-11", // Tue
+    "2025-11-27", // Thu
+    "2025-12-25", // Thu
+].map(dateString => getDateAsString(new Date(dateString + " 05:00 PST"))));
+
