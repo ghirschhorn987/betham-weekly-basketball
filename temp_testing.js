@@ -130,7 +130,7 @@ function zzz_deleteSelectedSheets() {
 }
 
 function testDates() {
-  var date = new Date(2023, 00, 07);
+  var date = new Date(2023, 0, 7);
   Logger.log(getWaitlistEmailSubjectForGameDate(getDateAsString(date)));
   Logger.log(date);
   date = addDaysToDate(date, 10);
