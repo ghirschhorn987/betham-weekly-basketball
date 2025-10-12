@@ -273,7 +273,9 @@ function replySynchronizedWaitlistUpdateForGameDate(gameDate, changes) {
   // Send email to ALL players who replied "In" at any point, not just newly added ones
   const playersToIncludeInEmail = changes.allInRepliers;
   
-  if (playersToIncludeInEmail.length > 0) {
+  if (playersToIncludeInEmail.length <= 0) {
+    Logger.log("No players replied 'In' - no update email to send");
+  } else {
     // Get the current waitlist order after synchronization
     const waitlistRange = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_WAITLIST_RANGE);
     const currentWaitlistOrder = getPlayerArrayFromRange(waitlistRange);
@@ -288,11 +290,9 @@ function replySynchronizedWaitlistUpdateForGameDate(gameDate, changes) {
       currentWaitlistOrder,
       true
     );
-    forwardEmail(thread, EMAIL_GROUP_ADMINS + "," + playersToIncludeInEmail.toString(), htmlBody, "update");
+    forwardEmail(thread, EMAIL_GROUP_ADMINS + "," + playersToIncludeInEmail.toString(), htmlBody, "last");
     
     Logger.log("Sent update email to " + playersToIncludeInEmail.length + " players who replied 'In'");
-  } else {
-    Logger.log("No players replied 'In' - no update email to send");
   }
 
   Logger.log("Finished sending synchronized waitlist update for day=" + gameDayString + ", gameDate=" + gameDate);
