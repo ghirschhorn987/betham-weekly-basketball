@@ -7,15 +7,15 @@ var USE_OVERRIDE_VALUES = false;
 const OVERRIDE_EMAIL_RECIPIENT_LIST = "ghirschhorn987@gmail.com";
 const OVERRIDE_ROSTER_SPREADSHEET_ID = "12RZOtExnlzukmODadbZxOjcL_2DYHbqTWbmIjpVwKHI"; // "SCRATCH COPY: Beth Am Basketball Rosters"
 const OVERRIDE_RSVP_SPREADSHEET_ID = "1tTdOgJaba8QwJBtt2iiXJGbdXE91jSw2Ps6ZP2F2HX8"; // "SCRATCH COPY:  Beth Am THURSDAY Basketball - RSVP"
-const OVERRIDE_ROSTER_EMAIL_SUBJECT = "TESTING - IGNORE THIS. Beth Am Basketball: Sign up for Thursday, Aug 28, 8-10pm";
-const OVERRIDE_WAITLIST_EMAIL_SUBJECT = "Beth Am THURSDAY Basketball: Possible open spots for tonight, Aug 28, 8-10pm";
+const OVERRIDE_ROSTER_EMAIL_SUBJECT = "TESTING - IGNORE THIS. Beth Am Basketball: Sign up for Thursday, Oct 16, 8-10pm";
+const OVERRIDE_WAITLIST_EMAIL_SUBJECT = "Beth Am THURSDAY Basketball: Possible open spots for tonight, Oct 16, 8-10pm";
 const OVERRIDE_LOG_EMAIL_INSTEAD_OF_SENDING = true; // if USE_OVERRIDE_VALUES is true, AND this is true, will log email instead of sending it
 
 //========================================
 // Production constants
 //========================================
 const ROSTER_SPREADSHEET_ID = "1Sue6ZR98PVYiz6MsotLygN43yKMbrHWuZROK9decd2s"; // "Beth Am Basketball Rosters";
-const SIGNUP_SHEET_TEMPLATE_SPREADSHEET_ID  = "17yqm2p3UyC-aRbuCfdBqPsJ-OXwLqr_32BPN4XIdbY8" // "Beth Am Basetball - Signup Sheet Templates"
+const SIGNUP_SHEET_TEMPLATE_SPREADSHEET_ID = "17yqm2p3UyC-aRbuCfdBqPsJ-OXwLqr_32BPN4XIdbY8" // "Beth Am Basetball - Signup Sheet Templates"
 const SIGNUP_SHEET_TEMPLATE_GAME_RSVPS_TAB_NAME = "Game RSVPs";
 const SIGNUP_SHEET_TEMPLATE_NO_GAME_TAB_NAME = "No Game";
 
@@ -72,15 +72,15 @@ const EMAIL_GROUP_ROSTER_NON_THURSDAY = "beth-am-basketball-roster-non-thursday@
 // as the same date regardless of whether PST or PDT (which is 1 hour later) is specified correctly.
 // (As of 2025, PDT is 2nd Sunday in March to 1st Sunday in November, PST is other times)
 const NO_GAME_DATES = new Set([
-    // 2025 NO GAMES
-    "2025-07-07", // Tue
-    "2025-09-21", // Sun
-    "2025-09-23", // Tue
-    "2025-10-02", // Thu
-    "2025-10-07", // Tue
-    "2025-10-14", // Tue
-    "2025-11-11", // Tue
-    "2025-11-27", // Thu
-    "2025-12-25", // Thu
+  // 2025 NO GAMES
+  "2025-07-07", // Tue
+  "2025-09-21", // Sun
+  "2025-09-23", // Tue
+  "2025-10-02", // Thu
+  "2025-10-07", // Tue
+  "2025-10-14", // Tue
+  "2025-11-11", // Tue
+  "2025-11-27", // Thu
+  "2025-12-25", // Thu
 ].map(dateString => getDateAsString(new Date(dateString + " 05:00 PST"))));
 

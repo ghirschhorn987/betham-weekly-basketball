@@ -6,12 +6,13 @@ function runOnce_MANUALLY() {
     throw new Error("Aborting manual test! USE_OVERRIDE_VALUES is not true. USE_OVERRIDE_VALUES=" + USE_OVERRIDE_VALUES);
   }
 
-  const gameDate = new Date("2025-08-28 00:00:00");
+  const gameDate = new Date("2025-10-16 00:00:00");
   // prepareRsvpSpreadsheetForDate(gameDate);
   // createAndSendRosterEmailForDate(gameDate);
   // createAndSendWaitlistEmailForGameDate(gameDate);
   // replyInitialToWaitlistEmailResponsesForGameDate(gameDate);
   // replyFinalToWaitlistEmailResponsesForGameDate(gameDate);
+  synchronizeWaitlistWithRsvpSpreadsheet(gameDate);
 }
 
 function runEveryMinute() {
@@ -525,8 +526,9 @@ function addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponses
         Logger.log("START DEBUG: ghirschhorn987 reply classified as IN.");
         var normalizedMessage = latestReply.trimStart().toLowerCase();
         var startsWithIn = normalizedMessage.startsWith(WAITLIST_IN_GAME_REPLY_LOWERCASE);
-        Logger.log("latestReply='" + latestReply + "'");
-        Logger.log("startsWithIn=" + startsWithIn);
+        Logger.log("\n\nlatestReply='" + latestReply + "'");
+        Logger.log("\n\nnormalizedMessage='" + normalizedMessage + "'");
+        Logger.log("\n\nstartsWithIn=" + startsWithIn);
         Logger.log("END DEBUG: ghirschhorn987 reply classified as IN.");
       }
 
