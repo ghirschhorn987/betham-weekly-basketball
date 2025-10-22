@@ -319,6 +319,7 @@ function synchronizeWaitlistWithRsvpSpreadsheet(gameDate) {
     playersDroppedFromGame: [],
     playersDroppedFromWaitlist: [],
     allInRepliers: []  // New field to track all players who replied "In"
+    
   };
 
   try {

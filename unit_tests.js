@@ -10,7 +10,8 @@ function runAllTests() {
   testGetWaitlistGroupEmails();
   testIsMainRosterPlayerString();
   testSynchronizeWaitlistHelperFunctions();
-
+  testRemovePlayerFromRange(); // Add the new test
+  
   Logger.log("Test suite finished.");
 }
 
@@ -352,3 +353,116 @@ function testSynchronizeWaitlistHelperFunctions() {
 
   Logger.log("Finished testing synchronizeWaitlist helper functions.");
 }
+
+function testRemovePlayerFromRange() {
+  Logger.log("Running test: testRemovePlayerFromRange...");
+  
+  // Create a mock Range object to test with
+  const mockRange = createMockRange([
+    ["John Doe <john@example.com>", "john@example.com"],
+    ["Jane Smith <jane@example.com>", "jane@example.com"],
+    ["", ""],
+    ["Bob Wilson <bob@example.com>", "bob@example.com"],
+    ["Mike Johnson <mike@example.com>", "mike@example.com"]
+  ]);
+  
+  // Track what cells were cleared
+  const clearedCells = [];
+  mockRange.trackedClearContent = function(row, col) {
+    clearedCells.push({row: row, col: col});
+    Logger.log(`Mock cell cleared: row=${row}, col=${col}`);
+  };
+
+  // Test 1: Remove a player that exists (exact match)
+  let result1 = removePlayerFromRange(mockRange, "John Doe <john@example.com>");
+  if (result1 !== 1 || clearedCells.length !== 2 || 
+      clearedCells[0].row !== 1 || clearedCells[0].col !== 1 ||
+      clearedCells[1].row !== 1 || clearedCells[1].col !== 2) {
+    Logger.log("Test Failed: removePlayerFromRange didn't properly remove exact match");
+    Logger.log("Expected: result=1, cells cleared at (1,1) and (1,2)");
+    Logger.log("Got: result=" + result1 + ", cells cleared: " + JSON.stringify(clearedCells));
+  } else {
+    Logger.log("Test Passed: Successfully removed player with exact match");
+  }
+  
+  // Reset tracking for next test
+  clearedCells.length = 0;
+  
+  // Test 2: Remove player with case differences
+  let result2 = removePlayerFromRange(mockRange, "JANE SMITH <jane@example.com>");
+  if (result2 !== 1 || clearedCells.length !== 2) {
+    Logger.log("Test Failed: removePlayerFromRange didn't properly handle case differences");
+    Logger.log("Expected: result=1, cells cleared at (2,1) and (2,2)");
+    Logger.log("Got: result=" + result2 + ", cells cleared: " + JSON.stringify(clearedCells));
+  } else {
+    Logger.log("Test Passed: Successfully removed player with case differences");
+  }
+  
+  // Reset tracking for next test
+  clearedCells.length = 0;
+  
+  // Test 3: Remove player by email only
+  let result3 = removePlayerFromRange(mockRange, "bob@example.com");
+  if (result3 !== 1 || clearedCells.length !== 2) {
+    Logger.log("Test Failed: removePlayerFromRange didn't properly handle email-only matching");
+    Logger.log("Expected: result=1, cells cleared at (4,1) and (4,2)");
+    Logger.log("Got: result=" + result3 + ", cells cleared: " + JSON.stringify(clearedCells));
+  } else {
+    Logger.log("Test Passed: Successfully removed player with email-only match");
+  }
+  
+  // Reset tracking for next test
+  clearedCells.length = 0;
+  
+  // Test 4: Try to remove player that doesn't exist
+  let result4 = removePlayerFromRange(mockRange, "Unknown Person <unknown@example.com>");
+  if (result4 !== 0 || clearedCells.length !== 0) {
+    Logger.log("Test Failed: removePlayerFromRange shouldn't remove non-existent player");
+    Logger.log("Expected: result=0, no cells cleared");
+    Logger.log("Got: result=" + result4 + ", cells cleared: " + JSON.stringify(clearedCells));
+  } else {
+    Logger.log("Test Passed: Correctly handled non-existent player");
+  }
+  
+  // Test 5: Extra whitespace in player string
+  clearedCells.length = 0;
+  let result5 = removePlayerFromRange(mockRange, "  Mike Johnson  <mike@example.com>  ");
+  if (result5 !== 1 || clearedCells.length !== 2) {
+    Logger.log("Test Failed: removePlayerFromRange didn't handle whitespace properly");
+    Logger.log("Expected: result=1, cells cleared at (5,1) and (5,2)");
+    Logger.log("Got: result=" + result5 + ", cells cleared: " + JSON.stringify(clearedCells));
+  } else {
+    Logger.log("Test Passed: Successfully handled whitespace in player string");
+  }
+  
+  Logger.log("Finished testRemovePlayerFromRange");
+}
+
+/**
+ * Creates a mock Range object for testing
+ * @param {Array<Array<string>>} data - 2D array of cell values
+ * @returns {Object} - Mock Range object
+ */
+function createMockRange(data) {
+  return {
+    data: data,
+    getHeight: function() { 
+      return this.data.length; 
+    },
+    getWidth: function() { 
+      return this.data[0].length; 
+    },
+    getCell: function(row, col) {
+      return {
+        isBlank: () => this.data[row-1][col-1] === "",
+        getValue: () => this.data[row-1][col-1],
+        clearContent: () => this.trackedClearContent(row, col)
+      };
+    },
+    trackedClearContent: function(row, col) {
+      // Default implementation - will be overridden in tests
+      this.data[row-1][col-1] = "";
+    }
+  };
+}
+
