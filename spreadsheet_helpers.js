@@ -147,14 +147,14 @@ function addValuesArrayToSpreadsheetRange(range, valuesToAddArray, skipNonBlankC
 function clearAndSetRangeValues(range, valuesArray) {
   // Clear the entire range first
   range.clearContent();
-
+  
   // Add values in order
   for (let i = 0; i < Math.min(valuesArray.length, range.getHeight()); i++) {
     if (valuesArray[i]) {
       range.getCell(i + 1, 1).setValue(valuesArray[i]);
     }
   }
-
+  
   Logger.log("Cleared range and set " + Math.min(valuesArray.length, range.getHeight()) + " values.");
 }
 

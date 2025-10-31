@@ -401,11 +401,12 @@ function synchronizeWaitlistWithRsvpSpreadsheet(gameDate) {
         // Add to in-game range
         const playersAddedArray = addValuesArrayToSpreadsheetRange(inGameRange, [playerToMove], true);
         Logger.log("playersAddedArray= " + playersAddedArray);
+
         if (playersAddedArray.length > 0) {
           // Remove from waitlist range
           removePlayerFromRange(waitlistRange, playerToMove);
           playersMovedToGame++;
-          Logger.log("Moved " + playerToMove + " from waitlist to in-game");
+          Logger.log("Finished moving " + playerToMove + " from waitlist to in-game");
         }
       }
       Logger.log("Moved " + playersMovedToGame + " players from waitlist to in-game spots");
@@ -416,6 +417,8 @@ function synchronizeWaitlistWithRsvpSpreadsheet(gameDate) {
     // Step 5: Compress waitlist to eliminate gaps
     Logger.log("Step 5: Compressing waitlist to eliminate gaps...");
     var finalWaitlistPlayers = getPlayerArrayFromRange(waitlistRange);
+    Logger.log("finalWaitlistPlayers: " + finalWaitlistPlayers);
+
     if (finalWaitlistPlayers.length > 0) {
       clearAndSetRangeValues(waitlistRange, finalWaitlistPlayers);
       Logger.log("Compressed waitlist: re-added " + finalWaitlistPlayers.length + " players in order");
@@ -425,7 +428,9 @@ function synchronizeWaitlistWithRsvpSpreadsheet(gameDate) {
 
     // Capture final state and calculate changes
     const finalInGamePlayers = getPlayerArrayFromRange(inGameRange);
+    Logger.log("finalInGamePlayers: " + finalInGamePlayers);
     finalWaitlistPlayers = getPlayerArrayFromRange(waitlistRange);
+    Logger.log("finalWaitlistPlayers: " + finalWaitlistPlayers);
 
     // Calculate changes by comparing initial and final states
     changes.playersAddedToGame = finalInGamePlayers.filter(player =>
@@ -524,7 +529,6 @@ function addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponses
     Logger.log("WaitlistEmailReply. msg.getFrom()=" + msg.getFrom() + ", playerString=" + playerString);
 
     if (isInGameReply(latestReply)) {
-
       // TODO: SPECIAL LOGIC TO DEBUG WHY ghirschhorn987 RESPONSES ARE CLASSIFIED AS IN
       if (playerString.includes("ghirschhorn987")) {
         Logger.log("START DEBUG: ghirschhorn987 reply classified as IN.");
