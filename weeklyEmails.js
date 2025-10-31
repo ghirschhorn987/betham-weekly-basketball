@@ -533,10 +533,8 @@ function addWaitlistEmailResponsesToMapsForGameDateByGroup(gameDate, inResponses
         Logger.log("\n\nlatestReply='" + latestReply + "'");
         Logger.log("\n\nnormalizedMessage='" + normalizedMessage + "'");
         Logger.log("\n\nstartsWithIn=" + startsWithIn);
-        Logger.log("END DEBUG: ghirschhorn987 reply classified as IN.");
-      }
-
-      if (isMainRosterPlayerString(playerString, rosterTypeToPlayerStrings)) {
+        Logger.log("END DEBUG: ghirschhorn987 reply classified as IN. BUT IGNORING ALTOGETHER!!!!");  
+      } else if (isMainRosterPlayerString(playerString, rosterTypeToPlayerStrings)) {
         Logger.log("IN reply -- primary wait list.");
         addPlayerStringToMap(inResponsesMapPrimary, playerString, latestReply);
       } else {
