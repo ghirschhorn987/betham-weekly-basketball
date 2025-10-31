@@ -140,11 +140,8 @@ function addValuesArrayToSpreadsheetRange(range, valuesToAddArray, skipNonBlankC
       + "\nvaluesAdded=" + valuesAdded.join(", ") + ", \nvaluesToAddArray=" + valuesToAddArray.join(", "));
   }
 
+  Logger.log("Successfully added " + valuesAdded.length + " values to range.");
   return valuesAdded;
-}
-
-Logger.log("Successfully added " + valuesAdded.length + " values to range.");
-return valuesAdded;
 }
 
 function clearAndSetRangeValues(range, valuesArray) {
