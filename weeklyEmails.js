@@ -88,7 +88,7 @@ function runEveryMinute() {
       } else {
         // Subsequent times: synchronize waitlist with spreadsheet
         const changes = synchronizeWaitlistWithRsvpSpreadsheet(currentDate);
-        
+
         // If there were changes, send an update email
         if (changes.hasChanges) {
           replySynchronizedWaitlistUpdateForGameDate(currentDate, changes);
@@ -273,26 +273,26 @@ function replySynchronizedWaitlistUpdateForGameDate(gameDate, changes) {
 
   // Send email to ALL players who replied "In" at any point, not just newly added ones
   const playersToIncludeInEmail = changes.allInRepliers;
-  
+
   if (playersToIncludeInEmail.length <= 0) {
     Logger.log("No players replied 'In' - no update email to send");
   } else {
     // Get the current waitlist order after synchronization
     const waitlistRange = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_WAITLIST_RANGE);
     const currentWaitlistOrder = getPlayerArrayFromRange(waitlistRange);
-    
+
     const thread = getWaitlistEmailThreadForGameDate(gameDate);
     const htmlBody = getSynchronizedWaitlistUpdateEmailBody(
-      gameDayString, 
-      changes.playersAddedToGame, 
-      changes.playersAddedToWaitlist, 
+      gameDayString,
+      changes.playersAddedToGame,
+      changes.playersAddedToWaitlist,
       changes.playersDroppedFromGame,
       changes.playersDroppedFromWaitlist,
       currentWaitlistOrder,
       true
     );
     forwardEmail(thread, EMAIL_GROUP_ADMINS + "," + playersToIncludeInEmail.toString(), htmlBody, "last");
-    
+
     Logger.log("Sent update email to " + playersToIncludeInEmail.length + " players who replied 'In'");
   }
 
@@ -319,17 +319,17 @@ function synchronizeWaitlistWithRsvpSpreadsheet(gameDate) {
     playersDroppedFromGame: [],
     playersDroppedFromWaitlist: [],
     allInRepliers: []  // New field to track all players who replied "In"
-    
+
   };
 
   try {
     // Capture initial state
     const inGameRange = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_IN_GAME_RANGE);
     const waitlistRange = getRsvpSpreadsheetRangeForGameDate(gameDate, RSVP_CELLS_WAITLIST_RANGE);
-    
+
     const initialInGamePlayers = getPlayerArrayFromRange(inGameRange);
     const initialWaitlistPlayers = getPlayerArrayFromRange(waitlistRange);
-    
+
     Logger.log("Initial state - In-game: " + initialInGamePlayers.length + " players, Waitlist: " + initialWaitlistPlayers.length + " players");
 
     // Step 1: Get current waitlist status from email responses
@@ -350,7 +350,7 @@ function synchronizeWaitlistWithRsvpSpreadsheet(gameDate) {
 
     // Step 2: Handle "out" players - remove them from both ranges
     Logger.log("Step 2: Removing 'out' players from spreadsheet...");
-    
+
     let outPlayersRemoved = 0;
     for (const playerString of outResponsesMap.keys()) {
       outPlayersRemoved += removePlayerFromRange(inGameRange, playerString);
@@ -378,8 +378,8 @@ function synchronizeWaitlistWithRsvpSpreadsheet(gameDate) {
     }
 
     if (playersToAdd.length > 0) {
-      const playersAddedCount = addValuesArrayToSpreadsheetRange(waitlistRange, playersToAdd, true);
-      Logger.log("Added " + playersAddedCount + " new players to waitlist");
+      const playersAddedArray = addValuesArrayToSpreadsheetRange(waitlistRange, playersToAdd, true);
+      Logger.log("Added " + playersAddedArray.length + " new players to waitlist");
     } else {
       Logger.log("No new players to add to waitlist");
     }
@@ -391,14 +391,17 @@ function synchronizeWaitlistWithRsvpSpreadsheet(gameDate) {
 
     if (openSpotCount > 0) {
       const updatedWaitlistPlayers = getPlayerArrayFromRange(waitlistRange);
-      
+      Logger.log("updatedWaitlistPlayers: " + updatedWaitlistPlayers);
+
       let playersMovedToGame = 0;
       for (let i = 0; i < Math.min(openSpotCount, updatedWaitlistPlayers.length); i++) {
         const playerToMove = updatedWaitlistPlayers[i];
-        
+        Logger.log("Moving " + playerToMove + " from waitlist to in-game");
+
         // Add to in-game range
-        const playerAdded = addValuesArrayToSpreadsheetRange(inGameRange, [playerToMove], true);
-        if (playerAdded > 0) {
+        const playersAddedArray = addValuesArrayToSpreadsheetRange(inGameRange, [playerToMove], true);
+        Logger.log("playersAddedArray= " + playersAddedArray);
+        if (playersAddedArray.length > 0) {
           // Remove from waitlist range
           removePlayerFromRange(waitlistRange, playerToMove);
           playersMovedToGame++;
@@ -425,29 +428,29 @@ function synchronizeWaitlistWithRsvpSpreadsheet(gameDate) {
     finalWaitlistPlayers = getPlayerArrayFromRange(waitlistRange);
 
     // Calculate changes by comparing initial and final states
-    changes.playersAddedToGame = finalInGamePlayers.filter(player => 
+    changes.playersAddedToGame = finalInGamePlayers.filter(player =>
       !isPlayerInPlayerArray(player, initialInGamePlayers)
     );
-    
-    changes.playersDroppedFromGame = initialInGamePlayers.filter(player => 
+
+    changes.playersDroppedFromGame = initialInGamePlayers.filter(player =>
       !isPlayerInPlayerArray(player, finalInGamePlayers)
     );
-    
-    changes.playersAddedToWaitlist = finalWaitlistPlayers.filter(player => 
-      !isPlayerInPlayerArray(player, initialWaitlistPlayers) && 
+
+    changes.playersAddedToWaitlist = finalWaitlistPlayers.filter(player =>
+      !isPlayerInPlayerArray(player, initialWaitlistPlayers) &&
       !isPlayerInPlayerArray(player, changes.playersAddedToGame)
     );
-    
-    changes.playersDroppedFromWaitlist = initialWaitlistPlayers.filter(player => 
+
+    changes.playersDroppedFromWaitlist = initialWaitlistPlayers.filter(player =>
       !isPlayerInPlayerArray(player, finalWaitlistPlayers) &&
       !isPlayerInPlayerArray(player, changes.playersAddedToGame)
     );
 
     // Set hasChanges flag
     changes.hasChanges = changes.playersAddedToGame.length > 0 ||
-                        changes.playersAddedToWaitlist.length > 0 ||
-                        changes.playersDroppedFromGame.length > 0 ||
-                        changes.playersDroppedFromWaitlist.length > 0;
+      changes.playersAddedToWaitlist.length > 0 ||
+      changes.playersDroppedFromGame.length > 0 ||
+      changes.playersDroppedFromWaitlist.length > 0;
 
     // Log summary of changes
     Logger.log("=== SYNCHRONIZATION SUMMARY ===");

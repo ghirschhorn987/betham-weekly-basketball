@@ -84,28 +84,6 @@ function getSpreadsheetRangeValuesAsArray(spreadsheetRange) {
   return nonEmptyValues;
 }
 
-function addValuesArrayToSpreadsheetRange(range, valuesToAddArray, skipNonBlankCells) {
-  const valuesAdded = [];
-  var startRow = 1;
-  valuesToAddArray.forEach(function (valueToAdd, index) {
-    for (row = startRow; row <= range.getHeight(); row++) {
-      const cell = range.getCell(row, 1);
-      if (cell.isBlank() || !skipNonBlankCells) {
-        cell.setValue(valueToAdd);
-        valuesAdded.push(valueToAdd);
-        break;
-      }
-    }
-    startRow = row + 1;
-  });
-
-  if (valuesAdded.length < valuesToAddArray.length) {
-    throw new Error("Aborting because could not add all values to range. Tried to add " + valuesToAddArray.length + " values but only added " + valuesAdded.length + ". Spreadsheet may be partially updated.");
-  }
-
-  return valuesAdded;
-}
-
 //========================================
 // Generic utility functions - javascript
 //========================================

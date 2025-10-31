@@ -117,47 +117,47 @@ function getPlayerArrayFromRange(range) {
   return playerArray;
 }
 
-function addValuesArrayToSpreadsheetRange(range, valuesArray, skipNonBlankCells = false) {
-  Logger.log("Adding " + valuesArray.length + " values to range.");
-  
-  let addedCount = 0;
-  let currentRow = 1;
-  
-  for (const value of valuesArray) {
-    // Find next available spot
-    while (currentRow <= range.getHeight()) {
-      const cell = range.getCell(currentRow, 1);
+function addValuesArrayToSpreadsheetRange(range, valuesToAddArray, skipNonBlankCells = false) {
+  Logger.log("Adding " + valuesToAddArray.length + " values to range.");
+
+  const valuesAdded = [];
+  var startRow = 1;
+  valuesToAddArray.forEach(function (valueToAdd, index) {
+    for (row = startRow; row <= range.getHeight(); row++) {
+      const cell = range.getCell(row, 1);
       if (cell.isBlank() || !skipNonBlankCells) {
-        cell.setValue(value);
-        addedCount++;
-        currentRow++;
+        cell.setValue(valueToAdd);
+        valuesAdded.push(valueToAdd);
         break;
       }
-      currentRow++;
     }
-    
-    // If we've reached the end of the range, stop
-    if (currentRow > range.getHeight()) {
-      Logger.log("Warning: Reached end of range. Could not add all values.");
-      break;
-    }
+    startRow = row + 1;
+  });
+
+  // If we've reached the end of the range, stop
+  if (valuesAdded.length < valuesToAddArray.length) {
+    Logger.log("Warning: In addValuesArrayToSpreadsheetRange(), reached end of range before adding all values. Added " + valuesAdded.length + " out of " + valuesToAddArray.length + " values."
+      + "\nvaluesAdded=" + valuesAdded.join(", ") + ", \nvaluesToAddArray=" + valuesToAddArray.join(", "));
   }
-  
-  Logger.log("Successfully added " + addedCount + " values to range.");
-  return addedCount;
+
+  return valuesAdded;
+}
+
+Logger.log("Successfully added " + valuesAdded.length + " values to range.");
+return valuesAdded;
 }
 
 function clearAndSetRangeValues(range, valuesArray) {
   // Clear the entire range first
   range.clearContent();
-  
+
   // Add values in order
   for (let i = 0; i < Math.min(valuesArray.length, range.getHeight()); i++) {
     if (valuesArray[i]) {
       range.getCell(i + 1, 1).setValue(valuesArray[i]);
     }
   }
-  
+
   Logger.log("Cleared range and set " + Math.min(valuesArray.length, range.getHeight()) + " values.");
 }
 
